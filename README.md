@@ -1,3 +1,4 @@
+<style>
 /* General Reset */
 body {
   font-family: Arial, sans-serif;
@@ -108,6 +109,7 @@ footer {
   background: #444;
   color: #fff;
 }
+</style>
 <!DOCTYPE html>
 <html lang="en">
 <head>
