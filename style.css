@@ -230,6 +230,7 @@ h1, h2 {
   opacity: 0; /* Initially hidden for loading animation */
   transform: translateY(20px); /* Initial animation offset */
   animation: fadeIn 0.5s forwards ease-in-out;
+    flex-direction: column;
 }
 
 .project h3 {
