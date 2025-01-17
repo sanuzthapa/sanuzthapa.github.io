@@ -1,219 +1,78 @@
- /* Global Styles */
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      line-height: 1.6;
-      background-color: #f9f9f9;
-    }
-
-    /* Header */
-    header {
-      background: linear-gradient(45deg, #333, #444);
-      color: #fff;
-      text-align: center;
-      padding: 1.5rem 0;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: 2.8rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    header p {
-      font-size: 1.2rem;
-      font-weight: 300;
-    }
-
-    /* Navigation */
-    nav {
-      background: #444;
-      display: flex;
-      justify-content: center;
-      padding: 0.7rem;
-    }
-
-    nav a {
-      color: #fff;
-      text-decoration: none;
-      margin: 0 15px;
-      font-weight: bold;
-      transition: color 0.3s ease;
-    }
-
-    nav a:hover {
-      color: #f0a500;
-    }
-
-    /* Container */
-    .container {
-      width: 90%;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 2rem 0;
-    }
-
-    section {
-      margin-bottom: 2rem;
-    }
-
-    /* About Section */
-    .about {
-      background: #fff;
-      padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Projects Section */
-    .projects {
-      background: #e8f5e9;
-      padding: 2rem;
-      border-radius: 10px;
-    }
-
-    .projects .project {
-      margin-bottom: 1.5rem;
-    }
-
-    .projects h3 {
-      color: #388e3c;
-      margin-bottom: 0.5rem;
-    }
-
-    .projects p {
-      color: #555;
-    }
-
-    /* Skills Section */
-    .skills {
-      background: #fff;
-      padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .skills ul {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      list-style-type: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    .skills li {
-      background: #eee;
-      padding: 0.7rem 1rem;
-      border-radius: 5px;
-      font-size: 1rem;
-      transition: transform 0.3s;
-    }
-
-    .skills li:hover {
-      transform: scale(1.05);
-      background: #dcedc8;
-    }
-
-    /* Contact Section */
-    .contact {
-      background: #f4f4f4;
-      padding: 2rem;
-      border-radius: 10px;
-      text-align: center;
-    }
-
-    .contact input, .contact textarea {
-      width: 100%;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      font-size: 1rem;
-    }
-
-    .contact button {
-      background: #333;
-      color: #fff;
-      border: none;
-      padding: 0.7rem 1.5rem;
-      cursor: pointer;
-      font-size: 1.2rem;
-      border-radius: 5px;
-      transition: background 0.3s ease;
-    }
-
-    .contact button:hover {
-      background: #f0a500;
-    }
-
-    /* Footer */
-    footer {
-      background: #333;
-      color: #fff;
-      text-align: center;
-      padding: 1rem 0;
-      margin-top: 2rem;
-    }
-
-    footer a {
-      color: #f0a500;
-      text-decoration: none;
-    }
-
-    footer a:hover {
-      text-decoration: underline;
-    }
-
-    /* Responsive Design */
-    @media (max-width: 768px) {
-      nav {
-        flex-direction: column;
-      }
-
-      nav a {
-        margin: 10px 0;
-      }
-
-      .skills ul {
-        flex-direction: column;
-      }
-    }
-
-    /* Smooth Scrolling */
-    html {
-      scroll-behavior: smooth;
-    }
-/* General Styling */
+/* Global Styles */
 body {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
+  line-height: 1.6;
+  background-color: #f9f9f9;
 }
 
-h1, h2 {
+/* Header */
+header {
+  background: linear-gradient(45deg, #333, #444);
+  color: #fff;
   text-align: center;
+  padding: 1.5rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+header h1 {
+  margin: 0;
+  font-size: 2.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+header p {
+  font-size: 1.2rem;
+  font-weight: 300;
+}
+
+/* Navigation */
+nav {
+  background: #444;
+  display: flex;
+  justify-content: center;
+  padding: 0.7rem;
+}
+
+nav a {
+  color: #fff;
+  text-decoration: none;
+  margin: 0 15px;
+  font-weight: bold;
+  transition: color 0.3s ease;
+}
+
+nav a:hover {
+  color: #f0a500;
+}
+
+/* Container */
 .container {
-  padding: 20px;
+  width: 95%;
+  max-width: 1400px;  /* Increased max width for larger page */
+  margin: 0 auto;
+  padding: 3rem 0;  /* Increased padding */
+}
+
+section {
+  margin-bottom: 2rem;
 }
 
 /* Projects Section */
 .projects {
   padding: 40px 20px;
+  background: #e8f5e9;
+  border-radius: 10px;
 }
 
 #project-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Adjusted grid size */
   gap: 20px;
   justify-content: center;
   align-items: start;
@@ -230,7 +89,9 @@ h1, h2 {
   opacity: 0; /* Initially hidden for loading animation */
   transform: translateY(20px); /* Initial animation offset */
   animation: fadeIn 0.5s forwards ease-in-out;
-    flex-direction: column;
+  height: 300px; /* Ensures all projects are the same height */
+  display: flex;
+  flex-direction: column;
 }
 
 .project h3 {
@@ -243,12 +104,25 @@ h1, h2 {
   font-size: 14px;
   color: #555;
   margin: 10px 0;
+  white-space: nowrap; /* Prevent text from wrapping */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  animation: marquee 10s linear infinite; /* Marquee effect */
 }
 
-/* Hover Effect */
 .project:hover {
   transform: translateY(-10px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Marquee Effect for Text */
+@keyframes marquee {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
 }
 
 /* Animation Keyframes */
@@ -264,4 +138,23 @@ h1, h2 {
   #project-container {
     grid-template-columns: 1fr;
   }
+}
+
+@media (max-width: 768px) {
+  nav {
+    flex-direction: column;
+  }
+
+  nav a {
+    margin: 10px 0;
+  }
+
+  .skills ul {
+    flex-direction: column;
+  }
+}
+
+/* Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
 }
