@@ -1,111 +1,184 @@
-<h1 align="center">Hi 👋, I'm THAPA Sanuz</h1>
-<h3 align="center">Student of Behavioral Economics at UFC, Besançon</h3>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portfolio</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+    }
 
----
+    header {
+      background: #333;
+      color: #fff;
+      padding: 1rem 0;
+      text-align: center;
+    }
 
-### 🔭 About the Project
+    header h1 {
+      margin: 0;
+      font-size: 2.5rem;
+    }
 
-Data analysis of Wage in different catagories with Dahsboard using shiny and R 
+    nav {
+      display: flex;
+      justify-content: center;
+      background: #444;
+      padding: 0.5rem 0;
+    }
 
----
-#### Methodology used in this project:
--  Upload Section of Data (not all datas may be compatable as its a wage analysis)
-- All the manipulation and analysis cann be done in web browser rather that Rstudo and vscode.
-- Dynamically filter the wages with slide bar.
-- can select/remove the variables by ticking(Results changes dynamically)
-- Comparison between two can be done in webb itself
-- Residulas Hiostogram
-- Coreelation plot of data in web
--Download the processed data in csv format.
----
-### Easy Navigation :
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      margin: 0 15px;
+      font-weight: bold;
+    }
 
-# Data Analysis in R with shiny (Web Application) 
+    nav a:hover {
+      color: #f0a500;
+    }
 
-## Table of Contents
-- [Dashboard overview](#Dashboard)
-- [upload Section](#introduction)
-- [Data Summary](#Data Summary)
-- [Dynamic Boxplot](#Dynamic Boxplot)
-- [Dynamic Regeresiion model ](#Dynamic Regeresiion model)
-- [Model Comparison](#Model Comparison)
-- [Correlation Plot](#correrelationplot)
-- [residuals Hoistogram](#residual histogram)
+    .container {
+      width: 90%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 0;
+    }
 
-## Introduction
-This exercise focuses on analyzing Wage in the dataset Dynam,ically through web version.
-Shiny is a powerful app library in R which helps in creating web version application for our R Models. Which makes it userfriendly adn no specefic R knowlede is required to navigate and use through Web as its userfriendly.
+    section {
+      margin-bottom: 2rem;
+    }
 
-#### 1. **`r4_eec.CSV ** Wage Information):
-- Contains details about all potential Sallarided with other information like gender, Timeworked .
-       Age = AGE,
-       Diploma = DDIPL,
-       Wage = SALMEE,
-       Gender = SEXE,
-       Worktime = TPP
-       ** Data seesm to be messy and unorganized **
----
+    .about, .projects, .skills {
+      background: #f4f4f4;
+      padding: 1.5rem;
+      border-radius: 10px;
+    }
 
-## Dashboard Overview
-![Dashboard Overview](https://github.com/sanuzthapa/Web-Dashboard-using-Shiny-in-R/blob/main/images/Dashboard.png)
+    .projects .project {
+      margin-bottom: 1rem;
+    }
 
-## Upload Section
-csv can be uploaded from the external storage 
-  
-![Upload Section](https://github.com/sanuzthapa/Web-Dashboard-using-Shiny-in-R/blob/main/images/upload.png)
+    .skills ul {
+      list-style-type: none;
+      padding: 0;
+    }
 
-## Data Summary
-Detailed Qu, Median ,Mean , Active, 3rd Qu. are shown ion the dashboard from the data.
+    .skills li {
+      display: inline-block;
+      margin: 0.5rem;
+      background: #ddd;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+    }
 
-![Upload Section](https://github.com/sanuzthapa/Web-Dashboard-using-Shiny-in-R/blob/main/images/img3.png)
+    .contact form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
 
-##  Dynamic Boxplot
+    .contact input, .contact textarea {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
 
-Boxoplot will be dynamically generated whn the slider in the filter is used, Which makes this applicatiuon quite dynamic and user freindly.
+    .contact button {
+      background: #333;
+      color: #fff;
+      border: none;
+      padding: 0.7rem;
+      cursor: pointer;
+      font-size: 1rem;
+      border-radius: 5px;
+    }
 
-<div style="display: flex; justify-content: center; gap: 10px;">
+    .contact button:hover {
+      background: #f0a500;
+    }
 
-<img src="https://github.com/sanuzthapa/PowerBi-Dahsboard/blob/main/img/i3boxplot.png" alt="Dynamic Boxplot 1" width="45%">
-<img src="https://github.com/sanuzthapa/PowerBi-Dahsboard/blob/main/img/i4boxplot.png" alt="Dynamic Boxplot 2" width="45%">
+    footer {
+      background: #333;
+      color: #fff;
+      text-align: center;
+      padding: 1rem 0;
+    }
 
-</div>
+    @media (max-width: 768px) {
+      nav {
+        flex-direction: column;
+      }
 
+      nav a {
+        margin: 10px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>My Portfolio</h1>
+    <p>Welcome to my personal portfolio website!</p>
+  </header>
 
-## Dynamic Regeresiion model 
-All the Variables are selectable and unselectable, and accordingly it will be adfdded to our model an ddata changes dynamicaslly.
-<img src="https://github.com/sanuzthapa/PowerBi-Dahsboard/blob/main/img/i5regressionallcheck.png" alt="Dynamic Boxplot 1" width="45%">
-<img src="https://github.com/sanuzthapa/PowerBi-Dahsboard/blob/main/img/i5regressionHalfcheck.png" alt="Dynamic Boxplot 2" width="45%">
-  
-## Model Comparison  
-here two models are taken into consideration,
+  <nav>
+    <a href="#about">About</a>
+    <a href="#projects">Projects</a>
+    <a href="#skills">Skills</a>
+    <a href="#contact">Contact</a>
+  </nav>
 
-model <- lm(Wage ~ Female + Age, data = eec)
-model2 <- lm(Wage ~ Female + Age + Study_nodiploma + Study_brevet + Study_capbep + Study_bac + Study_superieur, data = eec)
+  <div class="container">
+    <!-- About Section -->
+    <section id="about" class="about">
+      <h2>About Me</h2>
+      <p>Hello! I'm [Your Name], a passionate [Your Profession] with experience in [Your Specialization]. I love creating, innovating, and solving problems.</p>
+    </section>
 
-![Age Group vs Score ](https://github.com/sanuzthapa/PowerBi-Dahsboard/blob/main/img/i6modelComparison.png)
+    <!-- Projects Section -->
+    <section id="projects" class="projects">
+      <h2>Projects</h2>
+      <div class="project">
+        <h3>Project 1</h3>
+        <p>Description of the project and its key features.</p>
+      </div>
+      <div class="project">
+        <h3>Project 2</h3>
+        <p>Description of the project and its key features.</p>
+      </div>
+    </section>
 
+    <!-- Skills Section -->
+    <section id="skills" class="skills">
+      <h2>Skills</h2>
+      <ul>
+        <li>Skill 1</li>
+        <li>Skill 2</li>
+        <li>Skill 3</li>
+        <li>Skill 4</li>
+      </ul>
+    </section>
 
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+      <h2>Contact Me</h2>
+      <form>
+        <input type="text" placeholder="Your Name" required>
+        <input type="email" placeholder="Your Email" required>
+        <textarea placeholder="Your Message" rows="5" required></textarea>
+        <button type="submit">Send Message</button>
+      </form>
+    </section>
+  </div>
 
-## residuals Hoistogram
-![Age Group vs Score ](https://github.com/sanuzthapa/PowerBi-Dahsboard/blob/main/img/i6residual.png)
-
-## Correrelation Plot
-  ![Age Group vs Mean Review](https://github.com/sanuzthapa/PowerBi-Dahsboard/blob/main/img/i7Correlation.png)
-
-## Conclusion
-Summary of findings and insights from the analysis.
-
-
-### 💬 Connect with Me:
-- 📫 **Email**: [sanuzh.thapa@gmail.com](mailto:sanus.thapa@gmail.com)  
-- 🌐 **LinkedIn**: [www.linkedin.com/in/sanuz-thapa](https://linkedin.com/in/sanuz-thapa)  
-
----
-
-### 🛠️ Languages and Tools:
-shiny
-tidyverse
-DT
-corrplot
-
----
+  <footer>
+    <p>&copy; 2025 [Your Name]. All Rights Reserved.</p>
+  </footer>
+</body>
+</html>
