@@ -1,263 +1,185 @@
+/* General Reset */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+  background-color: #f9f9f9;
+  color: #333;
+}
+
+.dark-theme {
+  background-color: #1e1e1e;
+  color: #f9f9f9;
+}
+
+h1, h2, h3 {
+  margin: 0;
+}
+
+a {
+  color: #0073e6;
+  text-decoration: none;
+}
+
+/* Theme Switcher */
+.theme-switcher {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem;
+  background: #444;
+  color: #fff;
+}
+
+/* Profile Header */
+.profile-header {
+  text-align: center;
+  padding: 2rem 1rem;
+  background: #f4f4f4;
+}
+
+.profile-card {
+  max-width: 500px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.profile-img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  margin-bottom: 1rem;
+}
+
+.download-resume {
+  background: #333;
+  color: white;
+  padding: 0.7rem 1.5rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.download-resume:hover {
+  background: #f0a500;
+}
+
+/* Sections */
+main {
+  width: 90%;
+  max-width: 1200px;
+  margin: 2rem auto;
+}
+
+.about, .projects, .contact {
+  margin-bottom: 2rem;
+}
+
+.projects .project-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.project {
+  background: #fff;
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Contact */
+.contact ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.contact li {
+  margin-bottom: 1rem;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 1rem;
+  background: #444;
+  color: #fff;
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portfolio</title>
-  <style>
-    /* Global Styles */
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      line-height: 1.6;
-      background-color: #f9f9f9;
-    }
-
-    /* Header */
-    header {
-      background: linear-gradient(45deg, #333, #444);
-      color: #fff;
-      text-align: center;
-      padding: 1.5rem 0;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: 2.8rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    header p {
-      font-size: 1.2rem;
-      font-weight: 300;
-    }
-
-    /* Navigation */
-    nav {
-      background: #444;
-      display: flex;
-      justify-content: center;
-      padding: 0.7rem;
-    }
-
-    nav a {
-      color: #fff;
-      text-decoration: none;
-      margin: 0 15px;
-      font-weight: bold;
-      transition: color 0.3s ease;
-    }
-
-    nav a:hover {
-      color: #f0a500;
-    }
-
-    /* Container */
-    .container {
-      width: 90%;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 2rem 0;
-    }
-
-    section {
-      margin-bottom: 2rem;
-    }
-
-    /* About Section */
-    .about {
-      background: #fff;
-      padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Projects Section */
-    .projects {
-      background: #e8f5e9;
-      padding: 2rem;
-      border-radius: 10px;
-    }
-
-    .projects .project {
-      margin-bottom: 1.5rem;
-    }
-
-    .projects h3 {
-      color: #388e3c;
-      margin-bottom: 0.5rem;
-    }
-
-    .projects p {
-      color: #555;
-    }
-
-    /* Skills Section */
-    .skills {
-      background: #fff;
-      padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .skills ul {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      list-style-type: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    .skills li {
-      background: #eee;
-      padding: 0.7rem 1rem;
-      border-radius: 5px;
-      font-size: 1rem;
-      transition: transform 0.3s;
-    }
-
-    .skills li:hover {
-      transform: scale(1.05);
-      background: #dcedc8;
-    }
-
-    /* Contact Section */
-    .contact {
-      background: #f4f4f4;
-      padding: 2rem;
-      border-radius: 10px;
-      text-align: center;
-    }
-
-    .contact input, .contact textarea {
-      width: 100%;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      font-size: 1rem;
-    }
-
-    .contact button {
-      background: #333;
-      color: #fff;
-      border: none;
-      padding: 0.7rem 1.5rem;
-      cursor: pointer;
-      font-size: 1.2rem;
-      border-radius: 5px;
-      transition: background 0.3s ease;
-    }
-
-    .contact button:hover {
-      background: #f0a500;
-    }
-
-    /* Footer */
-    footer {
-      background: #333;
-      color: #fff;
-      text-align: center;
-      padding: 1rem 0;
-      margin-top: 2rem;
-    }
-
-    footer a {
-      color: #f0a500;
-      text-decoration: none;
-    }
-
-    footer a:hover {
-      text-decoration: underline;
-    }
-
-    /* Responsive Design */
-    @media (max-width: 768px) {
-      nav {
-        flex-direction: column;
-      }
-
-      nav a {
-        margin: 10px 0;
-      }
-
-      .skills ul {
-        flex-direction: column;
-      }
-    }
-
-    /* Smooth Scrolling */
-    html {
-      scroll-behavior: smooth;
-    }
-  </style>
+  <title>Portfolio Website</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header>
-    <h1>My Portfolio</h1>
-    <p>Welcome to my personal portfolio website!</p>
-  </header>
-
-  <nav>
-    <a href="#about">About</a>
-    <a href="#projects">Projects</a>
-    <a href="#skills">Skills</a>
-    <a href="#contact">Contact</a>
-  </nav>
-
-  <div class="container">
-    <!-- About Section -->
-    <section id="about" class="about">
-      <h2>About Me</h2>
-      <p>Hello! I'm [Your Name], a passionate [Your Profession] with experience in [Your Specialization]. I love creating, innovating, and solving problems.</p>
-    </section>
-
-    <!-- Projects Section -->
-    <section id="projects" class="projects">
-      <h2>Projects</h2>
-      <div class="project">
-        <h3>Project 1</h3>
-        <p>Description of the project and its key features.</p>
-      </div>
-      <div class="project">
-        <h3>Project 2</h3>
-        <p>Description of the project and its key features.</p>
-      </div>
-    </section>
-
-    <!-- Skills Section -->
-    <section id="skills" class="skills">
-      <h2>Skills</h2>
-      <ul>
-        <li>Skill 1</li>
-        <li>Skill 2</li>
-        <li>Skill 3</li>
-        <li>Skill 4</li>
-      </ul>
-    </section>
-
-    <!-- Contact Section -->
-    <section id="contact" class="contact">
-      <h2>Contact Me</h2>
-      <form>
-        <input type="text" placeholder="Your Name" required>
-        <input type="email" placeholder="Your Email" required>
-        <textarea placeholder="Your Message" rows="5" required></textarea>
-        <button type="submit">Send Message</button>
-      </form>
-    </section>
+  <div class="theme-switcher">
+    <p>Theme</p>
+    <button id="change-theme">Change Theme</button>
   </div>
 
+  <header class="profile-header">
+    <div class="profile-card">
+      <img src="https://via.placeholder.com/150" alt="Profile Picture" class="profile-img">
+      <h1>Ariful Alam</h1>
+      <p>⚡ Senior Software Engineer | Open Source Enthusiast ⚡</p>
+      <p>PHP | Node.js | React</p>
+      <button class="download-resume">Download Resume</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="about">
+      <h2>About Me</h2>
+      <p>Hi! I'm Ariful Alam, a senior software engineer and an avid open-source contributor. I specialize in building robust web applications and engaging user interfaces. When I'm not coding, you’ll find me exploring open-source tools and contributing to the community.</p>
+      <p><strong>Based in:</strong> Bangladesh</p>
+    </section>
+
+    <section class="projects">
+      <h2>GitHub Projects</h2>
+      <div class="project-grid">
+        <div class="project">
+          <h3>gitprofile</h3>
+          <p>Create and deploy a dynamic portfolio by just providing your GitHub username.</p>
+          <p><strong>Tech:</strong> TypeScript</p>
+        </div>
+        <div class="project">
+          <h3>ezfolio</h3>
+          <p>Open Source Portfolio/Resume CMS built using Laravel, React, and Ant Design.</p>
+          <p><strong>Tech:</strong> PHP</p>
+        </div>
+        <div class="project">
+          <h3>reactive-button</h3>
+          <p>3D animated React button component with a progress bar.</p>
+          <p><strong>Tech:</strong> JavaScript</p>
+        </div>
+        <!-- Add more project cards as needed -->
+      </div>
+    </section>
+
+    <section class="contact">
+      <h2>Contact Me</h2>
+      <ul>
+        <li><strong>GitHub:</strong> <a href="https://github.com/arifszn" target="_blank">arifszn</a></li>
+        <li><strong>Twitter:</strong> <a href="https://twitter.com/arif_szn" target="_blank">@arif_szn</a></li>
+        <li><strong>LinkedIn:</strong> <a href="https://linkedin.com/in/ariful-alam" target="_blank">ariful-alam</a></li>
+      </ul>
+    </section>
+  </main>
+
   <footer>
-    <p>&copy; 2025 [Your Name]. All Rights Reserved.</p>
-    <p>Find me on <a href="https://github.com/your-username" target="_blank">GitHub</a>.</p>
+    <p>&copy; 2025 Ariful Alam. All rights reserved.</p>
   </footer>
+
+  <script>
+    const changeThemeButton = document.getElementById('change-theme');
+    changeThemeButton.addEventListener('click', () => {
+      document.body.classList.toggle('dark-theme');
+    });
+  </script>
 </body>
 </html>
