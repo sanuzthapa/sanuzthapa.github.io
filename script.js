@@ -1,19 +1,27 @@
+// Replace 'your-username' with your actual GitHub username
+const GITHUB_USERNAME = 'sanuzthapa';
+
 async function fetchGitHubProjects() {
-  const response = await fetch('https://api.github.com/users/sanuzthapa/repos');
+  const response = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos`);
   const repos = await response.json();
 
-  const projectsContainer = document.querySelector('.project-grid');
+  const projectContainer = document.getElementById('project-container');
+
   repos.forEach(repo => {
-    const projectCard = document.createElement('div');
-    projectCard.className = 'project';
-    projectCard.innerHTML = `
-      <h3>${repo.name}</h3>
-      <p>${repo.description || 'No description available.'}</p>
-      <p><strong>Tech:</strong> ${repo.language || 'N/A'}</p>
-      <a href="${repo.html_url}" target="_blank">View on GitHub</a>
-    `;
-    projectsContainer.appendChild(projectCard);
+    // Filter out forked repositories if you want only original projects
+    if (!repo.fork) {
+      const projectDiv = document.createElement('div');
+      projectDiv.className = 'project';
+      projectDiv.innerHTML = `
+        <h3><a href="${repo.html_url}" target="_blank">${repo.name}</a></h3>
+        <p>${repo.description || 'No description available.'}</p>
+        <p><strong>Language:</strong> ${repo.language || 'N/A'}</p>
+        <p><strong>Stars:</strong> ${repo.stargazers_count}</p>
+      `;
+      projectContainer.appendChild(projectDiv);
+    }
   });
 }
 
+// Fetch and display the projects on page load
 fetchGitHubProjects();
