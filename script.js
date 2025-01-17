@@ -7,11 +7,14 @@ async function fetchGitHubProjects() {
 
   const projectContainer = document.getElementById('project-container');
 
+  let delay = 0; // Animation delay for staggered effect
+
   repos.forEach(repo => {
     // Filter out forked repositories if you want only original projects
     if (!repo.fork) {
       const projectDiv = document.createElement('div');
       projectDiv.className = 'project';
+      projectDiv.style.animationDelay = `${delay}s`; // Stagger animation
       projectDiv.innerHTML = `
         <h3><a href="${repo.html_url}" target="_blank">${repo.name}</a></h3>
         <p>${repo.description || 'No description available.'}</p>
@@ -19,6 +22,7 @@ async function fetchGitHubProjects() {
         <p><strong>Stars:</strong> ${repo.stargazers_count}</p>
       `;
       projectContainer.appendChild(projectDiv);
+      delay += 0.1; // Increase delay for each project
     }
   });
 }
