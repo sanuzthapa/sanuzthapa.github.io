@@ -1,4 +1,4 @@
-// Replace 'your-username' with your actual GitHub username
+// Replace 'sanuzthapa' with your actual GitHub username
 const GITHUB_USERNAME = 'sanuzthapa';
 
 async function fetchGitHubProjects() {
@@ -28,4 +28,4 @@ async function fetchGitHubProjects() {
 }
 
 // Fetch and display the projects on page load
-fetchGitHubProjects();
+document.addEventListener('DOMContentLoaded', fetchGitHubProjects);
