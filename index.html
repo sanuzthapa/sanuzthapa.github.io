@@ -1,199 +1,310 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fixed Layout with Profile</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icons.min.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Macondo&display=swap" rel="stylesheet">
-<script src="script.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THAPA Sanuz - Portfolio</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
 </head>
 <body>
-  <div class="container">
-    <!-- Section A -->
-    <div class="section-a">
-      <div class="row">
-        <!-- Profile Section -->
-        <div class="profile">
-          <img src="images/profilepic.png" alt="Profile Picture" class="profile-pic">
-          <div>
-            <h3>THAPA Sanuz</h3> <br>
-            <div class="wrapper">
-              <div class="typing-demo">
-              ⚡ Python | R | Web Development | Ethical Hacking |<br> Network Defense | PowerBI ⚡
-              </div>
-</div>
+    <div class="min-h-screen">
+        <div class="container">
+            <div class="grid">
+                <!-- Profile Section -->
+                <div class="profile-section">
+                    <div class="profile-card">
+                        <div class="profile-header">
+                            <img
+                                src="/images/profilepic.png"
+                                alt="Profile"
+                                class="profile-image"
+                            />
+                            <h1>THAPA Sanuz</h1>
+                            <div class="typing-effect">
+                                <p>⚡ Python | R | Web Development | Ethical Hacking | Network Defense | PowerBI ⚡</p>
+                            </div>
+                        </div>
 
-          </div>
-        </div>
-      </div>
+                        <!-- Contact Links -->
+                        <div class="contact-links">
+                            <div class="contact-item">
+                                <i class="icon" data-feather="map-pin"></i>
+                                
+                                <span class="flags">
+                            <img src="images/fr.png" alt="France Flag" style="width: 20px; height: 20px;"> l
+                            <img src="images/np.png" alt="Nepal Flag" style="width: 20px; height: 20px;">                                </span>
+                            </div>
+                            
+                            <a href="https://github.com/sanuzthapa" target="_blank" rel="noopener noreferrer" class="contact-item">
+                                <i class="icon" data-feather="github"></i>
+                                <span>sanuzthapa</span>
+                            </a>
+                            
+                            <a href="https://linkedin.com/in/sanuz-thapa" target="_blank" rel="noopener noreferrer" class="contact-item">
+                                <i class="icon" data-feather="linkedin"></i>
+                                <span>sanuz-thapa</span>
+                            </a>
+                            
+                            <a href="https://sanuzthapa.github.io/" target="_blank" rel="noopener noreferrer" class="contact-item">
+                                <i class="icon" data-feather="globe"></i>
+                                <span>Portfolio Website</span>
+                            </a>
+                            
+                            <a href="mailto:sanuzh.thapa@gmail.com" class="contact-item">
+                                <i class="icon" data-feather="mail"></i>
+                                <span>sanuzh.thapa@gmail.com</span>
+                            </a>
+                        </div>
 
-      <div class="row contact-links">
-        <div class="contact-item">
-          <span class="label"><i class="fas fa-map-marker-alt"></i> Based in:</span>
-          <span class="value">
-            <img src="images/fr.png" alt="France Flag" style="width: 20px; height: 20px;">
-            <img src="images/np.png" alt="Nepal Flag" style="width: 20px; height: 20px;">
-          </span>
-        </div>
+                        <!-- Technical Stacks -->
+                        <div class="tech-stacks">
+                            <h3>Technical Stacks</h3>
+                            <div class="stack-list">
+                                <p><span class="label">Web Development:</span> PHP, CSS, HTML, JavaScript, SQL, Django</p>
+                                <p><span class="label">Development:</span> Python, Selenium for automation</p>
+                                <p><span class="label">Data Analysis:</span> R, Python (NumPy, pandas, Matplotlib)</p>
+                                <p><span class="label">Networking:</span> Cisco Packet Tracer, Wireshark</p>
+                                <p><span class="label">Ethical Hacking:</span> Burp Suite</p>
+                                <p><span class="label">Software:</span> Excel, Power BI, UiPath automation</p>
+                            </div>
+                        </div>
 
-        <div class="contact-item">
-          <span class="label"><i class="fab fa-github"></i>GitHub:</span>
-          <span class="value">
-            <a href="https://github.com/sanuzthapa" target="_blank">sanuzthapa</a>
-          </span>
-        </div>
-        
-        <div class="contact-item">
-          <span class="label"><i class="fab fa-linkedin"></i>LinkedIn:</span>
-          <span class="value">
-            <a href="https://linkedin.com/in/sanuz-thapa" target="_blank">sanuz-thapa</a>
-          </span>
-        </div>
+                        <!-- Education -->
+                        <div class="education">
+                            <h3>Educational Background</h3>
+                            <div class="timeline">
+                                <div class="timeline-item">
+                                    <div class="education-entry">
+                                        <div class="degree-header">
+                                           <i class="fa-solid fa-book-open"></i>
+                                            <h4>Masters in Economics</h4>
+                                        </div>
+                                        <p class="degree-name"><i class="fa-solid fa-graduation-cap"></i> Behavioral Digital Economics for Effective Management</p>
+                                        <div class="university">
+                                            <i class="fa-solid fa-building-columns"></i>
+                                            <span>University of French-Comté, Besançon, FR</span>
+                                        </div>
+                                        <p class="graduation-date"><i class="fa-solid fa-hourglass"></i> Expected: 2025</p>
+                                    </div>
 
-        <div class="contact-item">
-          <span class="label"><i class="fas fa-globe"></i>Website:</span>
-          <span class="value">
-            <a href="https://sanuzthapa.github.io/" target="_blank">https://sanuzthapa.github.io/</a>
-          </span>
-        </div>
+                                    <div class="education-entry">
+                                        <div class="degree-header">
+                                            <i class="fa-solid fa-book-open"></i>
+                                            <h4>Bachelor in Engineering</h4>
+                                        </div>
+                                        <p class="degree-name"><i class="fa-solid fa-graduation-cap"></i> Computer Science and Engineering</p>
+                                        <div class="university">
+                                          <i class="fa-solid fa-building-columns"></i>
+                                            <span>Rungta College of Engineering and Technology, IN</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-        <div class="contact-item">
-          <span class="label"><i class="fas fa-envelope"></i>Email:</span>
-          <span class="value">
-            <a href="mailto:sanuzh.thapa@gmail.com">sanuzh.thapa@gmail.com</a>
-          </span>
-        </div>
-      </div>
+                <!-- Projects Section -->
+                <div class="projects-section">
+                    <div class="projects-card">
+                        <h2>GitHub Projects</h2>
+                        <div id="projects-grid" class="projects-grid">
+                            <!-- Projects will be dynamically inserted here -->
+                        </div>
+                    </div>
+                    
+                                   
+<!--Second Project Section Starts-->
+                    
+<div class="projects-section">
+<div class="projects-card">
+<h2>Work Experiences</h2>
 
-      <div class="technical-stacks">
-        <h3>Technical Stacks:</h3>
-        <ul>
-          <li><strong>Web Development: </strong> PHP, CSS, HTML, JavaScript, SQL,Django</li>
-          <li><strong>Development:</strong> Python, Selenium for automation</li>
-          <li><strong>Data Analysis and Visualization:</strong> R, Python (NumPy, pandas, Matplotlib)</li>
-          <li><strong>Networking:</strong> Cisco Packet Tracer, Wireshark</li>
-          <li><strong>Ethical Hacking:</strong> Burp Suite</li>
-          <li><strong>Software:</strong> Excel, Power BI, UiPath automation</li>
+<div id="projects-grid" class="projects-grid">
+    <div class="project-card">
+        <h3>Work Experiences </h3>
+        <p><strong>Management Informnation System Manager (MIS) </strong><br>
+            <i class="fa-regular fa-building"></i>
+        Sunwarshi Municipality, Morang, NP <br>
+            <i class="fa-solid fa-clock"></i> 12/2021-12/2022 (1 year/s)
+            
+        </p>
+        <div class="project-footer">
+            <span>Roles:<br>
+            - Digitization of files.<br>
+            - Synchroinizing with servers. <br>
+            - Task Automation using RPA (uiPath). <br>
+            - Protecting Public Data Integrity. <br>
+            - Data Cleaning and Manipulating with MS-Excel.<br>
+            - Responsible for optimizing and Updating organizational website. <br>
+            - Developing new Excel formulations as required.
+            
                 
+            </span>
 
-
-        </ul>
-
-      </div>
-
-        <div class="row education-timeline">
-  <!-- Section Title -->
-    <p style="text-align: left;font-size: 18px;padding-top: 5px; font-style: bold;">Educational Background:</p>
-    <br>
-
-  <!-- Education Timeline Items -->
-  <div class="timeline">
-    <div class="timeline-item">
-      <div class="timeline-marker"></div>
-      <div class="timeline-content">
-        <h4>Masters in Economics</h4>
-        <p><i class="fas fa-graduation-cap"></i> Behavioral Digital Economics for Effective Management</p>
-        <p><i class="fas fa-university"></i> University of French-Comté, Besançon, FR</p>
-        <p class="timeline-date">Graduation Date: 2025</p>
-      </div>
+        </div>
     </div>
+        <div class="project-card">
+            <h3> </h3>
+        <p><strong>Server Installation and Router Migration</strong><br>
+            <i class="fa-regular fa-building"></i>
+        Adobe HQ, Basel, CH <br>
+            <i class="fa-solid fa-clock"></i> 
+            1 week
+            
+        </p>
+        <div class="project-footer">
+            <span>Roles:<br>
+            - Replacing servers with new servers.<br>
+            - Migrating server data from old server to new.<br>
+            - Ensuring the Workabilty. <br>
+            - Designing the routing path.
+                        
+                
+            </span>
 
-    <div class="timeline-item">
-      <div class="timeline-marker"></div>
-      <div class="timeline-content">
-        <h4>Bachelor in Engineering</h4>
-        <p><i class="fas fa-graduation-cap"></i> Computer Science and Engineering</p>
-        <p><i class="fas fa-university"></i> Rungta College of Engineering and Technology, IN</p>
-      </div>
+        </div>
     </div>
-  </div>
+                            
 </div>
 
-<!-- CSS for Timeline -->
-<style>
-  .education-timeline {
-    width: 100%;
-    margin: 5px 0;
-  }
-  
-  .timeline {
-    position: relative;
-    padding: 10px 0;
-    max-width: 500px;
-    margin: 0 auto;
-  }
 
-  .timeline-item {
-    display: flex;
-    align-items: center;
-    margin-bottom: 20px;
-    position: relative;
-  }
+                    </div>
+                        
+                        
+                </div>
+                    
+<!-- Second project Section ends -->
+                    
+<!-- Second project Section ends -->
+                    
+<div class="projects-section">
+<div class="projects-card">
+<h2>Personal Projects : </h2>
 
-  .timeline-marker {
-    width: 20px;
-    height: 20px;
-    position: absolute;
-    left: 0px; /* Adjust this to properly align the circle with the content */
-  }
+<div id="projects-grid" class="projects-grid">
+    <div class="project-card">
+        <h3>Digitzation of Record Book:</h3>
+        <p><strong>Contract Based </strong><br>
+            <i class="fa-regular fa-building"></i>
+        Government of Nepal, NP <br>
+            <i class="fa-solid fa-clock"></i> 01/2022
+            
+        </p>
+        <div class="project-footer" style="font-size:13px;">
+            <span>Digitize of  the Hand-written (Traditional) recordbook on National database :<br>
+            - Step1 : Taking images of traditional bookeeping records.<br>
+            - Setp2 : Extracting Texts from Images . <br>
+            - Step3 : Using googlesheets and translating it to English (Database requirement)<br>
+            - Step4 : Using UIpath & selenium for brower automation.<br>
+            - Step5 : Inputting processed data into national database through automation.<br>
+            - Step6 : Humanly verifying for some errors and validating it. <br>
+            <strong></strong>
+            
+                
+            </span>
 
-  .timeline-content {
-    margin-left: 9px;
-    padding-left: 10px;
-    border-left: 2px solid #007bff;
-   
-      }
+        </div>
+    </div>
+ 
 
-  .timeline-content h4 {
-    font-size: 13px;
-    font-weight: bold;
-  }
-
-  .timeline-content p {
-    font-size: 14px;
-    margin: 5px 0;
-     #background-color: silver;
-  }
-
-  .timeline-date {
-    font-size: 12px;
-    color: #555;
-    margin-top: 5px;
-  }
-</style>
+                            
+</div>
 
 
+                   
+    
+    <br>
+    </div>
+                        
+                        
+</div>          
+                    
+<div class="projects-section">
+<div class="projects-card">
+<h2>Academic Projects : </h2>
 
+<div id="projects-grid" class="projects-grid">
+    <div class="project-card">
+        <h3>Impact of Scholartship in Academic Performance & outcome :</h3>
+        <p><strong>M1 R Project: Econometric Analysis and Model </strong><br>
+            <i class="fa-regular fa-building"></i>
+        M1 , BDEEM <br>
+            <i class="fa-solid fa-clock"></i> 01/2025 - Research Questions:<br><br>
+            1.  What is the difference in academic performance (first- and second-year grades) between scholarship recipients and non-recipients in the BDEEM Economics program?<br>
+            
+2.  Does receiving a scholarship influence student attendance and participation in the program?
+<br>
+3. How does attendance impact academic performance in the BDEEM Economics program, particularly for scholarship recipients compared to non-recipients? <br>
 
+4.  How do the Matthew and Pygmalion Effects influence the academic success of scholarship recipients, particularly in terms of compounding advantages and higher expectations?
 
-
+            
+                                                                            
+            
+        </p>
+<div class="project-footer" style="font-size: 13px;">
+    <span>
+        Conclusions from Report: 
+        <img src="/images/projectE.png" alt="Profile">
+    </span>
+</div>
 
     </div>
+        <div class="project-card">
+        <h3>Analyzing the Dynamics of Competition Policy: Insights from Antitrust and Growth
+:</h3>
+<p>
+    <strong>M1 Project: Competition Policy</strong><br><br>
+    <i class="fa-regular fa-building"></i> M1, BDEEM <br>
+    <i class="fa-solid fa-clock"></i>12/2024 <br><br>
+    <em>Analyzing the Dynamics of Competition Policy</em><br><br>
+    <strong>Findings:</strong><br>
+    1. Does implementing the new model help us better track competition policy? <br>
+    2. Comparison between the new model and the old model with a detailed analysis. <br>
+    3. Identification of major factors affecting and shaping the policy. <br>
+    4. Challenges and limitations of the study, with a focus on the comparison between the old model and the new model? <br>
+</p>
 
-    <!-- Section B -->
-    <div class="section-b">
-      <div class="column">
+<div class="project-footer" style="font-size: 13px;">
+    <span>
+        Conclusions from Report: 
+        <img src="/images/projectK.png" alt="Profile">
+        <img src="/images/projectEQ.png" alt="Profile">
+        
+    </span>
+</div>
 
-        <section id="projects" class="projects">
-            <h2>GitHub Projects:</h2>
-            <div id="project-container">
-            <!-- Projects will be dynamically loaded here -->
+    </div>
+ 
+
+                            
+</div>
+
+
+                   
+    
+    <br>
+    </div>
+                        
+                        
+</div>          
+                    
+                    
+                    
+                    
+                </div>
+                
+                
+                
+                
             </div>
-        </section>
-
-
-
-  </div>
-      <div class="column">Column 2 in B</div>
-      <div class="column">Column 3 in B</div>
-      <div class="column">Column 4 in B</div>
-      <div class="column">Column 5 in B</div>
+        </div>
     </div>
-  </div>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="script.js"></script>
 </body>
 </html>

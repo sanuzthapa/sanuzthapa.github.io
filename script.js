@@ -1,31 +1,40 @@
-// Replace 'sanuzthapa' with your actual GitHub username
-const GITHUB_USERNAME = 'sanuzthapa';
+// Initialize Feather icons
+document.addEventListener('DOMContentLoaded', () => {
+    feather.replace();
+    fetchGitHubProjects();
+});
 
+// Fetch GitHub projects
 async function fetchGitHubProjects() {
-  const response = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos`);
-  const repos = await response.json();
-
-  const projectContainer = document.getElementById('project-container');
-
-  let delay = 0; // Animation delay for staggered effect
-
-  repos.forEach(repo => {
-    // Filter out forked repositories if you want only original projects
-    if (!repo.fork) {
-      const projectDiv = document.createElement('div');
-      projectDiv.className = 'project';
-      projectDiv.style.animationDelay = `${delay}s`; // Stagger animation
-      projectDiv.innerHTML = `
-        <h3><a href="${repo.html_url}" target="_blank">${repo.name}</a></h3>
-        <p>${repo.description || 'No description available.'}</p>
-        <p><strong>Language:</strong> ${repo.language || 'N/A'}</p>
-        <p><strong>Stars:</strong> ${repo.stargazers_count}</p>
-      `;
-      projectContainer.appendChild(projectDiv);
-      delay += 0.1; // Increase delay for each project
+    try {
+        const response = await fetch('https://api.github.com/users/sanuzthapa/repos');
+        const repos = await response.json();
+        displayProjects(repos);
+    } catch (error) {
+        console.error('Error fetching repos:', error);
+        document.getElementById('projects-grid').innerHTML = '<p>Error loading projects. Please try again later.</p>';
     }
-  });
 }
 
-// Fetch and display the projects on page load
-document.addEventListener('DOMContentLoaded', fetchGitHubProjects);
+// Display projects in the grid
+function displayProjects(repos) {
+    const projectsGrid = document.getElementById('projects-grid');
+    const projectsHTML = repos.map(repo => `
+        <div class="project-card">
+            <h3>${repo.name}</h3>
+            <p>${repo.description || 'No description available'}</p>
+            <div class="project-footer">
+                <span class="project-language">${repo.language || 'N/A'}</span>
+                <a href="${repo.html_url}" target="_blank" rel="noopener noreferrer" class="project-link">
+                    <i data-feather="github" class="icon"></i>
+                    View Code
+                </a>
+            </div>
+        </div>
+    `).join('');
+    
+    projectsGrid.innerHTML = projectsHTML;
+    
+    // Re-initialize Feather icons for the newly added content
+    feather.replace();
+}
