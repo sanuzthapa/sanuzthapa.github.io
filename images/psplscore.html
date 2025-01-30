@@ -3,48 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Cricket Score</title>
+    <title>Embedded Google Apps Script</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
             margin: 20px;
         }
-        #scoreboard {
-            margin-top: 20px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            display: inline-block;
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: none;
         }
     </style>
 </head>
 <body>
-
-    <h2>Live Cricket Score</h2>
-    <div id="scoreboard">Loading...</div>
-
-    <script>
-        async function fetchLiveScore() {
-            try {
-                const response = await fetch("https://script.google.com/macros/s/AKfycbxURoEeG_zC7tOgXcNA_bkWdHBoGDNz0O2ZTVKmMpJJMkFhtRqe1c1RGyf9gPe6nzRwxA/exec");
-                const data = await response.json(); // Ensure your script returns JSON
-                
-                // Assuming data has properties like: score, team1, team2
-                document.getElementById("scoreboard").innerHTML = `
-                    <h3>${data.team1} vs ${data.team2}</h3>
-                    <p><strong>Score:</strong> ${data.score}</p>
-                    <p><strong>Overs:</strong> ${data.overs}</p>
-                `;
-            } catch (error) {
-                console.error("Error fetching live score:", error);
-                document.getElementById("scoreboard").innerHTML = "Failed to load score.";
-            }
-        }
-
-        // Fetch data every 10 seconds
-        fetchLiveScore();
-        setInterval(fetchLiveScore, 10000);
-    </script>
-
+    <h2>Live Cricket Scorer App</h2>
+    <iframe src="https://script.google.com/macros/s/AKfycbxURoEeG_zC7tOgXcNA_bkWdHBoGDNz0O2ZTVKmMpJJMkFhtRqe1c1RGyf9gPe6nzRwxA/exec"></iframe>
 </body>
 </html>
