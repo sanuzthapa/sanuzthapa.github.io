@@ -1,310 +1,233 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THAPA Sanuz - Portfolio</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icons.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>THAPA Sanuz - Portfolio (Advanced)</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icons.min.css" />
+<style>
+:root {
+    --bg: #0e0e16;
+    --card: #161624;
+    --card-hover: #202033;
+    --accent: #6b86ff;
+    --accent2: #9f6bff;
+    --text: #f5f5f5;
+    --subtext: #c7c7c7;
+    --shadow: rgba(0,0,0,0.4);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+body { background: var(--bg); color: var(--text); overflow-x: hidden; }
+.container { width: 95%; max-width: 1450px; margin: auto; padding: 35px 0; display: flex; flex-direction: column; gap: 35px; }
+.top-section { display: flex; gap: 35px; height: 600px; }
+.profile-section { width: 30%; overflow-y: auto; padding-right: 10px; scrollbar-width: thin; }
+.main-scroll { width: 70%; overflow-y: auto; padding-right: 10px; scrollbar-width: thin; }
+.profile-section::-webkit-scrollbar, .main-scroll::-webkit-scrollbar { width: 5px; }
+.profile-section::-webkit-scrollbar-thumb, .main-scroll::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+.profile-card { background: var(--card); padding: 25px; border-radius: 22px; box-shadow: 0 0 25px var(--shadow); position: sticky; top: 25px; }
+.profile-image { width: 130px; height: 130px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; border: 3px solid var(--accent); }
+h1 { text-align: center; margin-bottom: 5px; font-size: 22px; }
+.typing-effect p { text-align: center; color: var(--accent); font-size: 13px; }
+.contact-links { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
+.contact-item { display: flex; align-items: center; gap: 10px; background: var(--card-hover); padding: 10px 14px; border-radius: 12px; text-decoration: none; color: var(--text); transition: .3s; }
+.contact-item:hover { background: var(--accent); transform: translateX(6px); }
+.skills-wrapper { margin-top: 10px; }
+.skill-bar { margin: 12px 0; }
+.skill-bar span { font-size: 14px; font-weight: 600; display: flex; align-items: center; }
+.bar-bg { width: 100%; height: 10px; background: #2a2a3f; border-radius: 50px; overflow: hidden; margin-top: 4px; }
+.bar-fill { height: 10px; background: linear-gradient(90deg, var(--accent), var(--accent2)); width: 0%; border-radius: 50px; animation: fillAnim 2.2s forwards; }
+@keyframes fillAnim { from { width: 0%; } to { width: var(--target); } }
+.skill-sublist { margin-left: 18px; margin-top: 6px; }
+.skill-sublist li { font-size: 12px; color: var(--subtext); margin: 2px 0; }
+.skill-marker { width: 8px; height: 8px; background: var(--accent2); border-radius: 50%; display: inline-block; margin-right: 6px; box-shadow: 0 0 6px var(--accent2);} 
+.projects-card { background: var(--card); padding: 25px; border-radius: 22px; margin-bottom: 35px; box-shadow: 0 0 25px var(--shadow); }
+.projects-card h2 { color: var(--accent); margin-bottom: 15px; font-size: 22px; }
+.projects-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+.project-card { background: var(--card-hover); padding: 18px; border-radius: 15px; transition: .3s; box-shadow: 0 0 12px var(--shadow); min-height: 180px; position: relative; }
+.project-card:hover { background: var(--accent); transform: translateY(-8px); color: white; }
+.tech-tag { display: inline-block; padding: 5px 10px; background: var(--accent2); border-radius: 8px; font-size: 11px; margin: 3px; }
+.project-note { font-size: 12px; color: var(--subtext); margin-top: 6px; }
+.timeline { position: relative; margin-top: 25px; border-left: 3px solid var(--accent); padding-left: 25px; }
+.timeline-item { margin: 25px 0; position: relative; opacity: 0; transform: translateX(40px); transition: all .6s ease; cursor: pointer; }
+.timeline-item.active { opacity: 1; transform: translateX(0); }
+.timeline-dot { width: 16px; height: 16px; background: var(--accent2); border-radius: 50%; position: absolute; left: -33px; top: 5px; box-shadow: 0 0 10px var(--accent2); }
+.timeline-content h3 { color: var(--accent); margin-bottom: 5px; font-size: 18px; }
+.timeline-content p { color: var(--subtext); font-size: 13px; margin: 3px 0; }
+.timeline-hover-content { position: absolute; top: 0; left: 105%; width: 270px; background: var(--card); padding: 15px; border-radius: 12px; box-shadow: 0 0 15px var(--shadow); opacity: 0; pointer-events: none; transition: all .3s; font-size: 13px; z-index: 10; }
+.timeline-item:hover .timeline-hover-content { opacity: 1; pointer-events: auto; }
+</style>
 </head>
 <body>
-    <div class="min-h-screen">
-        <div class="container">
-            <div class="grid">
-                <!-- Profile Section -->
-                <div class="profile-section">
-                    <div class="profile-card">
-                        <div class="profile-header">
-                            <img
-                                src="/images/profilepic.png"
-                                alt="Profile"
-                                class="profile-image"
-                            />
-                            <h1>THAPA Sanuz</h1>
-                            <div class="typing-effect">
-                                <p>⚡ Python | R | Web Development | Ethical Hacking | Network Defense | PowerBI ⚡</p>
-                            </div>
-                        </div>
+<div class="container">
+<div class="top-section">
+<div class="profile-section">
+<div class="profile-card">
+    <div class="profile-header">
+        <img src="/images/profilepic.png" class="profile-image" />
+        <h1>THAPA Sanuz</h1>
+        <div class="typing-effect"><p>⚡ Data • Web • Networks • Automation ⚡</p></div>
+    </div>
+    <div class="contact-links">
+        <div class="contact-item"><img src="images/fr.png" style="width:20px"> | <img src="images/np.png" style="width:20px"></div>
+        <a href="https://github.com/sanuzthapa" class="contact-item"><i class="fa-brands fa-github"></i> GitHub</a>
+        <a href="https://linkedin.com/in/sanuz-thapa" class="contact-item"><i class="fa-brands fa-linkedin"></i> LinkedIn</a>
+        <a href="mailto:sanuzh.thapa@gmail.com" class="contact-item"><i class="fa-solid fa-envelope"></i> Email</a>
+    </div>
 
-                        <!-- Contact Links -->
-                        <div class="contact-links">
-                            <div class="contact-item">
-                                <i class="icon" data-feather="map-pin"></i>
-                                
-                                <span class="flags">
-                            <img src="images/fr.png" alt="France Flag" style="width: 20px; height: 20px;"> l
-                            <img src="images/np.png" alt="Nepal Flag" style="width: 20px; height: 20px;">                                </span>
-                            </div>
-                            
-                            <a href="https://github.com/sanuzthapa" target="_blank" rel="noopener noreferrer" class="contact-item">
-                                <i class="icon" data-feather="github"></i>
-                                <span>sanuzthapa</span>
-                            </a>
-                            
-                            <a href="https://linkedin.com/in/sanuz-thapa" target="_blank" rel="noopener noreferrer" class="contact-item">
-                                <i class="icon" data-feather="linkedin"></i>
-                                <span>sanuz-thapa</span>
-                            </a>
-                            
-                            <a href="https://sanuzthapa.github.io/" target="_blank" rel="noopener noreferrer" class="contact-item">
-                                <i class="icon" data-feather="globe"></i>
-                                <span>Portfolio Website</span>
-                            </a>
-                            
-                            <a href="mailto:sanuzh.thapa@gmail.com" class="contact-item">
-                                <i class="icon" data-feather="mail"></i>
-                                <span>sanuzh.thapa@gmail.com</span>
-                            </a>
-                        </div>
-
-                        <!-- Technical Stacks -->
-                        <div class="tech-stacks">
-                            <h3>Technical Stacks</h3>
-                            <div class="stack-list">
-                                <p><span class="label">Web Development:</span> PHP, CSS, HTML, JavaScript, SQL, Django</p>
-                                <p><span class="label">Development:</span> Python, Selenium for automation</p>
-                                <p><span class="label">Data Analysis:</span> R, Python (NumPy, pandas, Matplotlib)</p>
-                                <p><span class="label">Networking:</span> Cisco Packet Tracer, Wireshark</p>
-                                <p><span class="label">Ethical Hacking:</span> Burp Suite</p>
-                                <p><span class="label">Software:</span> Excel, Power BI, UiPath automation</p>
-                            </div>
-                        </div>
-
-                        <!-- Education -->
-                        <div class="education">
-                            <h3>Educational Background</h3>
-                            <div class="timeline">
-                                <div class="timeline-item">
-                                    <div class="education-entry">
-                                        <div class="degree-header">
-                                           <i class="fa-solid fa-book-open"></i>
-                                            <h4>Masters in Economics</h4>
-                                        </div>
-                                        <p class="degree-name"><i class="fa-solid fa-graduation-cap"></i> Behavioral Digital Economics for Effective Management</p>
-                                        <div class="university">
-                                            <i class="fa-solid fa-building-columns"></i>
-                                            <span>University of French-Comté, Besançon, FR</span>
-                                        </div>
-                                        <p class="graduation-date"><i class="fa-solid fa-hourglass"></i> Expected: 2025</p>
-                                    </div>
-
-                                    <div class="education-entry">
-                                        <div class="degree-header">
-                                            <i class="fa-solid fa-book-open"></i>
-                                            <h4>Bachelor in Engineering</h4>
-                                        </div>
-                                        <p class="degree-name"><i class="fa-solid fa-graduation-cap"></i> Computer Science and Engineering</p>
-                                        <div class="university">
-                                          <i class="fa-solid fa-building-columns"></i>
-                                            <span>Rungta College of Engineering and Technology, IN</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Projects Section -->
-                <div class="projects-section">
-                    <div class="projects-card">
-                        <h2>GitHub Projects</h2>
-                        <div id="projects-grid" class="projects-grid">
-                            <!-- Projects will be dynamically inserted here -->
-                        </div>
-                    </div>
-                    
-                                   
-<!--Second Project Section Starts-->
-                    
-<div class="projects-section">
-<div class="projects-card">
-<h2>Work Experiences</h2>
-
-<div id="projects-grid" class="projects-grid">
-    <div class="project-card">
-        <h3>Work Experiences </h3>
-        <p><strong>Management Informnation System Manager (MIS) </strong><br>
-            <i class="fa-regular fa-building"></i>
-        Sunwarshi Municipality, Morang, NP <br>
-            <i class="fa-solid fa-clock"></i> 12/2021-12/2022 (1 year/s)
-            
-        </p>
-        <div class="project-footer">
-            <span>Roles:<br>
-            - Digitization of files.<br>
-            - Synchroinizing with servers. <br>
-            - Task Automation using RPA (uiPath). <br>
-            - Protecting Public Data Integrity. <br>
-            - Data Cleaning and Manipulating with MS-Excel.<br>
-            - Responsible for optimizing and Updating organizational website. <br>
-            - Developing new Excel formulations as required.
-            
-                
-            </span>
-
+    <h3 style="margin-top:20px;color:var(--accent);">Skills</h3>
+    <div class="skills-wrapper">
+        <div class="skill-bar"><span><span class='skill-marker'></span>Python</span>
+            <div class="bar-bg"><div class="bar-fill" style="--target: 92%;"></div></div>
+            <ul class="skill-sublist">
+                <li>Pandas, NumPy, Matplotlib, Seaborn</li>
+                <li>scikit‑learn, TensorFlow</li>
+            </ul>
+        </div>
+        <div class="skill-bar"><span><span class='skill-marker'></span>Web Dev</span>
+            <div class="bar-bg"><div class="bar-fill" style="--target: 80%;"></div></div>
+            <ul class="skill-sublist">
+                <li>PHP, Django, CSS, Databases</li>
+            </ul>
+        </div>
+        <div class="skill-bar"><span><span class='skill-marker'></span>Power BI</span>
+            <div class="bar-bg"><div class="bar-fill" style="--target: 70%;"></div></div>
+            <ul class="skill-sublist">
+                <li>DAX, Reporting</li>
+            </ul>
         </div>
     </div>
-        <div class="project-card">
-            <h3> </h3>
-        <p><strong>Server Installation and Router Migration</strong><br>
-            <i class="fa-regular fa-building"></i>
-        Adobe HQ, Basel, CH <br>
-            <i class="fa-solid fa-clock"></i> 
-            1 week
-            
-        </p>
-        <div class="project-footer">
-            <span>Roles:<br>
-            - Replacing servers with new servers.<br>
-            - Migrating server data from old server to new.<br>
-            - Ensuring the Workabilty. <br>
-            - Designing the routing path.
-                        
-                
-            </span>
-
-        </div>
-    </div>
-                            
 </div>
-
-
-                    </div>
-                        
-                        
-                </div>
-                    
-<!-- Second project Section ends -->
-                    
-<!-- Second project Section ends -->
-                    
-<div class="projects-section">
+</div>
+<div class="main-scroll">
 <div class="projects-card">
-<h2>Personal Projects : </h2>
-
-<div id="projects-grid" class="projects-grid">
-    <div class="project-card">
-        <h3>Digitzation of Record Book:</h3>
-        <p><strong>Contract Based </strong><br>
-            <i class="fa-regular fa-building"></i>
-        Government of Nepal, NP <br>
-            <i class="fa-solid fa-clock"></i> 01/2022
-            
-        </p>
-        <div class="project-footer" style="font-size:13px;">
-            <span>Digitize of  the Hand-written (Traditional) recordbook on National database :<br>
-            - Step1 : Taking images of traditional bookeeping records.<br>
-            - Setp2 : Extracting Texts from Images . <br>
-            - Step3 : Using googlesheets and translating it to English (Database requirement)<br>
-            - Step4 : Using UIpath & selenium for brower automation.<br>
-            - Step5 : Inputting processed data into national database through automation.<br>
-            - Step6 : Humanly verifying for some errors and validating it. <br>
-            <strong></strong>
-            
-                
-            </span>
-
-        </div>
-    </div>
- 
-
-                            
+<h2>GitHub Projects</h2>
+<div id="projects-grid" class="projects-grid"></div>
+</div>
+</div>
 </div>
 
-
-                   
-    
-    <br>
-    </div>
-                        
-                        
-</div>          
-                    
-<div class="projects-section">
 <div class="projects-card">
-<h2>Academic Projects : </h2>
-
-<div id="projects-grid" class="projects-grid">
-    <div class="project-card">
-        <h3>Impact of Scholartship in Academic Performance & outcome :</h3>
-        <p><strong>M1 R Project: Econometric Analysis and Model </strong><br>
-            <i class="fa-regular fa-building"></i>
-        M1 , BDEEM <br>
-            <i class="fa-solid fa-clock"></i> 01/2025 - Research Questions:<br><br>
-            1.  What is the difference in academic performance (first- and second-year grades) between scholarship recipients and non-recipients in the BDEEM Economics program?<br>
-            
-2.  Does receiving a scholarship influence student attendance and participation in the program?
-<br>
-3. How does attendance impact academic performance in the BDEEM Economics program, particularly for scholarship recipients compared to non-recipients? <br>
-
-4.  How do the Matthew and Pygmalion Effects influence the academic success of scholarship recipients, particularly in terms of compounding advantages and higher expectations?
-
-            
-                                                                            
-            
-        </p>
-<div class="project-footer" style="font-size: 13px;">
-    <span>
-        Conclusions from Report: 
-        <img src="/images/projectE.png" alt="Profile">
-    </span>
-</div>
-
-    </div>
-        <div class="project-card" id="competition-policy">
-        <h3>Analyzing the Dynamics of Competition Policy: Insights from Antitrust and Growth
-:</h3>
-<p>
-    <strong>M1 Project: Competition Policy</strong><br><br>
-    <i class="fa-regular fa-building"></i> M1, BDEEM <br>
-    <i class="fa-solid fa-clock"></i>12/2024 <br><br>
-    <em>Analyzing the Dynamics of Competition Policy</em><br><br>
-    <strong>Findings:</strong><br>
-    1. Does implementing the new model help us better track competition policy? <br>
-    2. Comparison between the new model and the old model with a detailed analysis. <br>
-    3. Identification of major factors affecting and shaping the policy. <br>
-    4. Challenges and limitations of the study, with a focus on the comparison between the old model and the new model? <br>
-</p>
-
-<div class="project-footer" style="font-size: 13px;">
-    <span>
-        Conclusions from Report: 
-        <img src="/images/projectK.png" alt="Profile">
-        <img src="/images/projectEQ.png" alt="Profile">
-        
-    </span>
-</div>
-
-    </div>
- 
-
-                            
-</div>
-
-
-                   
-    
-    <br>
-    </div>
-                        
-                        
-</div>          
-                    
-                    
-                    
-                    
-                </div>
-                
-                
-                
-                
+<h2>Educational Background</h2>
+<div class="timeline">
+    <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+            <h3>Masters in Economics</h3>
+            <p>Behavioral Digital Economics for Effective Management</p>
+            <p>University of French-Comté, Besançon, FR (Expected 2025)</p>
+            <div class="timeline-hover-content">
+                <strong>Courses:</strong><br>
+                Cooperative Game Theory<br>
+                Econometrics<br>
+                Panel Data Econometrics<br>
+                Behavioral Economics and Technique<br>
+                Bargaining Theory<br>
+                Auction & Procurement Theory<br>
+                Theory of Regulations<br>
+                Business Intelligence<br>
+                Neural Marketing<br>
+                Business Data Analysis
             </div>
         </div>
     </div>
-    <script src="https://unpkg.com/feather-icons"></script>
-    <script src="script.js"></script>
+    <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+            <h3>Bachelor in Engineering</h3>
+            <p>Computer Science and Engineering</p>
+            <p>Rungta College of Engineering and Technology, IN</p>
+            <div class="timeline-hover-content">
+                <strong>Courses:</strong><br>
+                DSA<br>
+                Data Mining<br>
+                Computer Graphics<br>
+                Advanced Algorithms<br>
+                Maths Behind the Algorithms<br>
+                Programming Concepts
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<div class="projects-card">
+<h2>Work Experience</h2>
+<div class="projects-grid">
+    <div class="project-card">
+        <h3>Intern – Opinion Monitoring & Data Science - Meteco SAS</h3>
+        <p>April 2025 – July 2025, Besançon, FR</p>
+        <p>• Developed automated data pipelines for social media monitoring (5+ platforms).<br>• Optimized Instagram Visibrain datasets (28k+ entries).<br>• Implemented LLM-based sentiment and visual analysis.<br>• Conducted Migration Project (NLP & multimodal analysis).<br>• Integrated textual & visual embeddings for insights generation.<br>Key Skills: Python · Data Mining · Pipedream Automation · NLP · LLMs (ChatGPT API) · Sentiment Analysis · OCR · Multimodal Learning · Social Media Analytics</p>
+    </div>
+    <div class="project-card">
+        <h3>Management Information System (MIS) Manager - Sunwarshi Municipality</h3>
+        <p>Dec. 2020 – Dec. 2021, Morang, Nepal</p>
+        <p>• Managed data workflows including cleaning, validation, preprocessing, modeling, and importing.<br>• Performed SQL-based data extraction, updates, and database operations.<br>• Developed advanced Excel reporting tools, including pivot tables, queries, and macros.<br>• Designed and maintained Power BI dashboards.<br>• Implemented RPA tools to automate repetitive tasks.</p>
+    </div>
+</div>
+</div>
+
+<div class="projects-section">
+<div class="projects-card">
+<h2>Personal Projects</h2>
+<div class="projects-grid">
+    <div class="project-card">
+        <h3>Digitization of Record Book - Government of Nepal</h3>
+        <p>01/2022</p>
+        <p>• Step1: Taking images of traditional bookkeeping records.<br>• Step2: Extracting texts from images.<br>• Step3: Using Google Sheets and translating to English.<br>• Step4: UIPath & Selenium automation.<br>• Step5: Inputting processed data into national database.<br>• Step6: Human verification and validation.</p>
+    </div>
+</div>
+</div>
+
+<div class="projects-card">
+<h2>Academic Projects</h2>
+<div class="projects-grid">
+    <div class="project-card">
+        <h3>Impact of Scholarship in Academic Performance & Outcome - M1 R Project, BDEEM</h3>
+        <p>01/2025</p>
+        <p>Research Questions:<br>• Difference in grades between scholarship recipients and non-recipients.<br>• Influence of scholarship on attendance and participation.<br>• Impact of attendance on academic performance.<br>• Effects of Matthew & Pygmalion.</p>
+        <div class="project-footer" style="font-size: 13px;"><span>Conclusions from Report: <img src="/images/projectE.png" alt="Profile"></span></div>
+    </div>
+    <div class="project-card">
+        <h3>Analyzing the Dynamics of Competition Policy - M1 Project, BDEEM</h3>
+        <p>12/2024</p>
+        <p>Findings:<br>• Policy tracking improvement.<br>• Comparison of new vs old model.<br>• Identification of major influencing factors.<br>• Challenges and limitations analysis.</p>
+        <div class="project-footer" style="font-size: 13px;"><span>Conclusions from Report: <img src="/images/projectK.png" alt="Profile"> <img src="/images/projectEQ.png" alt="Profile"></span></div>
+    </div>
+</div>
+</div>
+
+<script>
+fetch("https://api.github.com/users/sanuzthapa/repos")
+.then(res => res.json())
+.then(data => {
+    const grid = document.querySelectorAll("#projects-grid")[0];
+    if(grid){
+        data.forEach(repo => {
+            const card = document.createElement("div");
+            card.className = "project-card";
+            card.innerHTML = `
+                <h3>${repo.name}</h3>
+                <p>${repo.description || "No description provided."}</p>
+                <div>${repo.language ? `<span class='tech-tag'>${repo.language}</span>` : ""}</div>
+                <div class='project-note'>Note: Auto-fetched from GitHub.</div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+});
+
+const timelineItems = document.querySelectorAll('.timeline-item');
+function revealTimeline() {
+  timelineItems.forEach(item => {
+    const rect = item.getBoundingClientRect();
+    if (rect.top < window.innerHeight - 80) {
+      item.classList.add('active');
+    }
+  });
+}
+window.addEventListener('scroll', revealTimeline);
+revealTimeline();
+</script>
 </body>
 </html>
