@@ -6,6 +6,7 @@
 <title>THAPA Sanuz - Portfolio (Advanced)</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icons.min.css" />
+<script src="https://unpkg.com/feather-icons"></script>
 <style>
 :root {
     --bg: #0e0e16;
@@ -18,62 +19,151 @@
     --shadow: rgba(0,0,0,0.4);
 }
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-body { background: var(--bg); color: var(--text); overflow-x: hidden; }
+body { background: var(--bg); color: var(--text); overflow-x: hidden; font-size: 16px; }
 .container { width: 95%; max-width: 1450px; margin: auto; padding: 35px 0; display: flex; flex-direction: column; gap: 35px; }
-.top-section { display: flex; gap: 35px; height: auto; min-height: 600px; }
+.top-section { display: flex; gap: 35px; min-height: 600px; }
 .profile-section { width: 30%; padding-right: 10px; overflow: visible; }
 .main-scroll { width: 70%; overflow-y: auto; padding-right: 10px; scrollbar-width: thin; }
 .profile-section::-webkit-scrollbar, .main-scroll::-webkit-scrollbar { width: 5px; }
 .profile-section::-webkit-scrollbar-thumb, .main-scroll::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
-.profile-card { background: var(--card); padding: 25px; border-radius: 22px; box-shadow: 0 0 25px var(--shadow); position: sticky; top: 25px; }
-.profile-image { width: 130px; height: 130px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; border: 3px solid var(--accent); }
-h1 { text-align: center; margin-bottom: 5px; font-size: 22px; }
-.typing-effect p { text-align: center; color: var(--accent); font-size: 13px; }
+.profile-card { background: var(--card); padding: 25px; border-radius: 22px; box-shadow: 0 0 25px var(--shadow); position: sticky; top: 25px; text-align: center; }
+.profile-image { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; margin: 0 auto 10px auto; border: 3px solid var(--accent); display: block; }
+h1 { margin-bottom: 10px; font-size: 28px; }
+.typing-effect p { color: var(--accent); font-size: 16px; margin-bottom: 15px; }
 .contact-links { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
-.contact-item { display: flex; align-items: center; gap: 10px; background: var(--card-hover); padding: 10px 14px; border-radius: 12px; text-decoration: none; color: var(--text); transition: .3s; }
+.contact-item { display: flex; align-items: center; gap: 10px; background: var(--card-hover); padding: 10px 14px; border-radius: 12px; text-decoration: none; color: var(--text); transition: .3s; font-size: 15px; }
 .contact-item:hover { background: var(--accent); transform: translateX(6px); }
 .skills-wrapper { margin-top: 10px; }
 .skill-bar { margin: 12px 0; }
-.skill-bar span { font-size: 14px; font-weight: 600; display: flex; align-items: center; }
-.bar-bg { width: 100%; height: 10px; background: #2a2a3f; border-radius: 50px; overflow: hidden; margin-top: 4px; }
-.bar-fill { height: 10px; background: linear-gradient(90deg, var(--accent), var(--accent2)); width: 0%; border-radius: 50px; animation: fillAnim 2.2s forwards; }
+.skill-bar span { font-size: 15px; font-weight: 600; display: flex; align-items: center; }
+.bar-bg { width: 100%; height: 12px; background: #2a2a3f; border-radius: 50px; overflow: hidden; margin-top: 4px; }
+.bar-fill { height: 12px; background: linear-gradient(90deg, var(--accent), var(--accent2)); width: 0%; border-radius: 50px; animation: fillAnim 2.2s forwards; }
 @keyframes fillAnim { from { width: 0%; } to { width: var(--target); } }
 .skill-sublist { margin-left: 18px; margin-top: 6px; }
-.skill-sublist li { font-size: 12px; color: var(--subtext); margin: 2px 0; }
+.skill-sublist li { font-size: 13px; color: var(--subtext); margin: 2px 0; }
 .skill-marker { width: 8px; height: 8px; background: var(--accent2); border-radius: 50%; display: inline-block; margin-right: 6px; box-shadow: 0 0 6px var(--accent2);} 
+
 .projects-card { background: var(--card); padding: 25px; border-radius: 22px; margin-bottom: 35px; box-shadow: 0 0 25px var(--shadow); }
-.projects-card h2 { color: var(--accent); margin-bottom: 15px; font-size: 22px; }
-.projects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
-.project-card { background: var(--card-hover); padding: 18px; border-radius: 15px; transition: .3s; box-shadow: 0 0 12px var(--shadow); min-height: 180px; position: relative; word-break: break-word; }
-.project-card:hover { background: var(--accent); transform: translateY(-8px); color: white; }
-.tech-tag { display: inline-block; padding: 5px 10px; background: var(--accent2); border-radius: 8px; font-size: 11px; margin: 3px; }
+.projects-card h2 { color: var(--accent); margin-bottom: 15px; font-size: 26px; }
+
+.projects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+
+.project-card {
+    background: var(--card-hover);
+    padding: 18px;
+    border-radius: 15px;
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+    box-shadow: 0 0 12px var(--shadow);
+    min-height: 200px;
+    position: relative;
+    word-break: break-word;
+    font-size: 15px;
+    border: 2px solid transparent;
+    overflow: hidden;
+}
+
+.project-card h3 { font-size: 18px; color: var(--accent); margin-bottom: 8px; }
+.project-card p { font-size: 14px; color: var(--subtext); margin-bottom: 6px; line-height: 1.5; }
+
+.project-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 15px;
+    padding: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent), var(--accent2));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    z-index: 0;
+    opacity: 0;
+    animation: rotateBorder 2s linear infinite;
+    pointer-events: none;
+}
+@keyframes rotateBorder {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.project-card:hover::before { opacity: 1; }
+.project-card:hover { transform: scale(1.03); }
+
+.tech-tag { display: inline-block; padding: 5px 10px; background: var(--accent2); border-radius: 8px; font-size: 12px; margin: 3px; }
 .project-note { font-size: 12px; color: var(--subtext); margin-top: 6px; }
+
+.view-code-container { border-top: 1px solid var(--accent); margin-top: 10px; padding-top: 10px; display: flex; justify-content: center; }
+.view-code-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--card-hover); color: var(--text); font-size: 14px; font-weight: 600; border-radius: 8px; text-decoration: none; transition: 0.3s; box-shadow: 0 0 8px var(--shadow); }
+.view-code-btn i { width: 16px; height: 16px; }
+.view-code-btn:hover { background: var(--accent); color: white; transform: translateY(-2px); box-shadow: 0 0 12px var(--accent2); }
+
 .timeline { position: relative; margin-top: 25px; border-left: 3px solid var(--accent); padding-left: 25px; overflow: hidden; }
 .timeline-item { margin: 25px 0; position: relative; opacity: 0; transform: translateX(40px); transition: all .6s ease; cursor: pointer; }
 .timeline-item.active { opacity: 1; transform: translateX(0); }
 .timeline-dot { width: 16px; height: 16px; background: var(--accent2); border-radius: 50%; position: absolute; left: -33px; top: 5px; box-shadow: 0 0 10px var(--accent2); }
-.timeline-content h3 { color: var(--accent); margin-bottom: 5px; font-size: 18px; }
-.timeline-content p { color: var(--subtext); font-size: 13px; margin: 3px 0; }
-.timeline-hover-content { position: absolute; top: 0; left: 105%; width: 270px; background: var(--card); padding: 15px; border-radius: 12px; box-shadow: 0 0 15px var(--shadow); opacity: 0; pointer-events: none; transition: all .3s; font-size: 13px; z-index: 10; white-space: normal; }
-/* Show hover content on right if enough space, else left */
-.timeline-item:hover .timeline-hover-content {
-    left: auto;
-    right: 105%;
-    opacity: 1;
-    pointer-events: auto;
+.timeline-content h3 { color: var(--accent); margin-bottom: 5px; font-size: 20px; }
+.timeline-content p { color: var(--subtext); font-size: 14px; margin: 3px 0; }
+.timeline-hover-content { position: absolute; top: 0; left: 105%; width: 270px; background: var(--card); padding: 15px; border-radius: 12px; box-shadow: 0 0 15px var(--shadow); opacity: 0; pointer-events: none; transition: all .3s; font-size: 14px; z-index: 10; white-space: normal; }
+.timeline-item:hover .timeline-hover-content { left: auto; right: 105%; opacity: 1; pointer-events: auto; }
+
+.project-card {
+    background: var(--card-hover);
+    padding: 18px;
+    border-radius: 15px;
+    position: relative;
+    min-height: 200px;
+    word-break: break-word;
+    font-size: 15px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 2px solid var(--card-hover);
 }
+
+.project-card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0 20px var(--accent2);
+}
+
+/* shining border effect */
+.project-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 15px;
+    padding: 2px; /* thickness of the animated shine */
+    background: linear-gradient(90deg, transparent, var(--accent), var(--accent2), transparent);
+    background-size: 200% 100%;
+    -webkit-mask: 
+        linear-gradient(#fff 0 0) content-box, 
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+
+.project-card:hover::before {
+    opacity: 1;
+    animation: shine 1.5s linear infinite;
+}
+
+@keyframes shine {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
 </style>
 </head>
 <body>
 <div class="container">
+
+<!-- Top Section -->
 <div class="top-section">
 <div class="profile-section">
 <div class="profile-card">
-    <div class="profile-header">
-        <img src="/images/profilepic.png" class="profile-image" />
-        <h1>THAPA Sanuz</h1>
-        <div class="typing-effect"><p>⚡ Data • Web • Networks • Automation ⚡</p></div>
-    </div>
+    <img src="/images/profilepic.png" class="profile-image" />
+    <h1>THAPA Sanuz</h1>
+    <div class="typing-effect"><p>⚡ Data • Web • Networks • Automation ⚡</p></div>
     <div class="contact-links">
         <div class="contact-item"><img src="images/fr.png" style="width:20px"> | <img src="images/np.png" style="width:20px"></div>
         <a href="https://github.com/sanuzthapa" class="contact-item"><i class="fa-brands fa-github"></i> GitHub</a>
@@ -105,6 +195,7 @@ h1 { text-align: center; margin-bottom: 5px; font-size: 22px; }
     </div>
 </div>
 </div>
+
 <div class="main-scroll">
 <div class="projects-card">
 <h2>GitHub Projects</h2>
@@ -113,6 +204,7 @@ h1 { text-align: center; margin-bottom: 5px; font-size: 22px; }
 </div>
 </div>
 
+<!-- Educational Background -->
 <div class="projects-card">
 <h2>Educational Background</h2>
 <div class="timeline">
@@ -157,6 +249,7 @@ h1 { text-align: center; margin-bottom: 5px; font-size: 22px; }
 </div>
 </div>
 
+<!-- Work Experience -->
 <div class="projects-card">
 <h2>Work Experience</h2>
 <div class="projects-grid">
@@ -173,7 +266,7 @@ h1 { text-align: center; margin-bottom: 5px; font-size: 22px; }
 </div>
 </div>
 
-<div class="projects-section">
+<!-- Personal & Academic Projects -->
 <div class="projects-card">
 <h2>Personal Projects</h2>
 <div class="projects-grid">
@@ -192,23 +285,24 @@ h1 { text-align: center; margin-bottom: 5px; font-size: 22px; }
         <h3>Impact of Scholarship in Academic Performance & Outcome - M1 R Project, BDEEM</h3>
         <p>01/2025</p>
         <p>Research Questions:<br>• Difference in grades between scholarship recipients and non-recipients.<br>• Influence of scholarship on attendance and participation.<br>• Impact of attendance on academic performance.<br>• Effects of Matthew & Pygmalion.</p>
-        <div class="project-footer" style="font-size: 13px;"><span>Conclusions from Report: <img src="/images/projectE.png" alt="Profile"></span></div>
     </div>
     <div class="project-card">
         <h3>Analyzing the Dynamics of Competition Policy - M1 Project, BDEEM</h3>
         <p>12/2024</p>
         <p>Findings:<br>• Policy tracking improvement.<br>• Comparison of new vs old model.<br>• Identification of major influencing factors.<br>• Challenges and limitations analysis.</p>
-        <div class="project-footer" style="font-size: 13px;"><span>Conclusions from Report: <img src="/images/projectK.png" alt="Profile"> <img src="/images/projectEQ.png" alt="Profile"></span></div>
     </div>
 </div>
 </div>
 
 <script>
-fetch("https://api.github.com/users/sanuzthapa/repos")
-.then(res => res.json())
-.then(data => {
-    const grid = document.querySelectorAll("#projects-grid")[0];
-    if(grid){
+// Fetch GitHub projects
+async function fetchGitHubProjects() {
+    const grid = document.querySelector("#projects-grid");
+    if (!grid) return;
+
+    try {
+        const res = await fetch("https://api.github.com/users/sanuzthapa/repos");
+        const data = await res.json();
         data.forEach(repo => {
             const card = document.createElement("div");
             card.className = "project-card";
@@ -216,20 +310,27 @@ fetch("https://api.github.com/users/sanuzthapa/repos")
                 <h3>${repo.name}</h3>
                 <p>${repo.description || "No description provided."}</p>
                 <div>${repo.language ? `<span class='tech-tag'>${repo.language}</span>` : ""}</div>
+                <div class="view-code-container">
+                    <a href="${repo.html_url}" target="_blank" class="view-code-btn"><i data-feather="github"></i> View Code</a>
+                </div>
                 <div class='project-note'>Note: Auto-fetched from GitHub.</div>
             `;
             grid.appendChild(card);
         });
+        feather.replace();
+    } catch (err) {
+        console.error("Error fetching GitHub projects:", err);
     }
-});
+}
 
+fetchGitHubProjects();
+
+// Timeline animation
 const timelineItems = document.querySelectorAll('.timeline-item');
 function revealTimeline() {
   timelineItems.forEach(item => {
     const rect = item.getBoundingClientRect();
-    if (rect.top < window.innerHeight - 80) {
-      item.classList.add('active');
-    }
+    if (rect.top < window.innerHeight - 80) item.classList.add('active');
   });
 }
 window.addEventListener('scroll', revealTimeline);
