@@ -65,7 +65,63 @@ h1 { margin-bottom: 10px; font-size: 28px; }
 .project-card h3 { font-size: 18px; color: var(--accent); margin-bottom: 8px; }
 .project-card p { font-size: 14px; color: var(--subtext); margin-bottom: 6px; line-height: 1.5; }
 
-.project-card:hover { transform: scale(1.03); box-shadow: 0 0 20px var(--accent2); }
+.project-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 15px;
+    padding: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent), var(--accent2));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    z-index: 0;
+    opacity: 0;
+    animation: rotateBorder 2s linear infinite;
+    pointer-events: none;
+}
+@keyframes rotateBorder {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.project-card:hover::before { opacity: 1; }
+.project-card:hover { transform: scale(1.03); }
+
+.tech-tag { display: inline-block; padding: 5px 10px; background: var(--accent2); border-radius: 8px; font-size: 12px; margin: 3px; }
+.project-note { font-size: 12px; color: var(--subtext); margin-top: 6px; }
+
+.view-code-container { border-top: 1px solid var(--accent); margin-top: 10px; padding-top: 10px; display: flex; justify-content: center; }
+.view-code-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--card-hover); color: var(--text); font-size: 14px; font-weight: 600; border-radius: 8px; text-decoration: none; transition: 0.3s; box-shadow: 0 0 8px var(--shadow); }
+.view-code-btn i { width: 16px; height: 16px; }
+.view-code-btn:hover { background: var(--accent); color: white; transform: translateY(-2px); box-shadow: 0 0 12px var(--accent2); }
+
+.timeline { position: relative; margin-top: 25px; border-left: 3px solid var(--accent); padding-left: 25px; overflow: hidden; }
+.timeline-item { margin: 25px 0; position: relative; opacity: 0; transform: translateX(40px); transition: all .6s ease; cursor: pointer; }
+.timeline-item.active { opacity: 1; transform: translateX(0); }
+.timeline-dot { width: 16px; height: 16px; background: var(--accent2); border-radius: 50%; position: absolute; left: -33px; top: 5px; box-shadow: 0 0 10px var(--accent2); }
+.timeline-content h3 { color: var(--accent); margin-bottom: 5px; font-size: 20px; }
+.timeline-content p { color: var(--subtext); font-size: 14px; margin: 3px 0; }
+.timeline-hover-content { position: absolute; top: 0; left: 105%; width: 270px; background: var(--card); padding: 15px; border-radius: 12px; box-shadow: 0 0 15px var(--shadow); opacity: 0; pointer-events: none; transition: all .3s; font-size: 14px; z-index: 10; white-space: normal; }
+.timeline-item:hover .timeline-hover-content { left: auto; right: 105%; opacity: 1; pointer-events: auto; }
+
+.project-card {
+    background: var(--card-hover);
+    padding: 18px;
+    border-radius: 15px;
+    position: relative;
+    min-height: 200px;
+    word-break: break-word;
+    font-size: 15px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 2px solid var(--card-hover);
+}
+
+.project-card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0 20px var(--accent2);
+}
 
 /* shining border effect */
 .project-card::before {
@@ -73,7 +129,7 @@ h1 { margin-bottom: 10px; font-size: 28px; }
     position: absolute;
     inset: 0;
     border-radius: 15px;
-    padding: 2px;
+    padding: 2px; /* thickness of the animated shine */
     background: linear-gradient(90deg, transparent, var(--accent), var(--accent2), transparent);
     background-size: 200% 100%;
     -webkit-mask: 
@@ -95,23 +151,6 @@ h1 { margin-bottom: 10px; font-size: 28px; }
     0% { background-position: -200% 0; }
     100% { background-position: 200% 0; }
 }
-
-.tech-tag { display: inline-block; padding: 5px 10px; background: var(--accent2); border-radius: 8px; font-size: 12px; margin: 3px; }
-.project-note { font-size: 12px; color: var(--subtext); margin-top: 6px; }
-
-.view-code-container { border-top: 1px solid var(--accent); margin-top: 10px; padding-top: 10px; display: flex; justify-content: center; }
-.view-code-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--card-hover); color: var(--text); font-size: 14px; font-weight: 600; border-radius: 8px; text-decoration: none; transition: 0.3s; box-shadow: 0 0 8px var(--shadow); }
-.view-code-btn i { width: 16px; height: 16px; }
-.view-code-btn:hover { background: var(--accent); color: white; transform: translateY(-2px); box-shadow: 0 0 12px var(--accent2); }
-
-.timeline { position: relative; margin-top: 25px; border-left: 3px solid var(--accent); padding-left: 25px; overflow: hidden; }
-.timeline-item { margin: 25px 0; position: relative; opacity: 0; transform: translateX(40px); transition: all .6s ease; cursor: pointer; }
-.timeline-item.active { opacity: 1; transform: translateX(0); }
-.timeline-dot { width: 16px; height: 16px; background: var(--accent2); border-radius: 50%; position: absolute; left: -33px; top: 5px; box-shadow: 0 0 10px var(--accent2); }
-.timeline-content h3 { color: var(--accent); margin-bottom: 5px; font-size: 20px; }
-.timeline-content p { color: var(--subtext); font-size: 14px; margin: 3px 0; }
-.timeline-hover-content { position: absolute; top: 0; left: 105%; width: 270px; background: var(--card); padding: 15px; border-radius: 12px; box-shadow: 0 0 15px var(--shadow); opacity: 0; pointer-events: none; transition: all .3s; font-size: 14px; z-index: 10; white-space: normal; }
-.timeline-item:hover .timeline-hover-content { left: auto; right: 105%; opacity: 1; pointer-events: auto; }
 
 </style>
 </head>
@@ -227,6 +266,18 @@ h1 { margin-bottom: 10px; font-size: 28px; }
 </div>
 </div>
 
+<!-- Personal & Academic Projects -->
+<div class="projects-card">
+<h2>Personal Projects</h2>
+<div class="projects-grid">
+    <div class="project-card">
+        <h3>Digitization of Record Book - Government of Nepal</h3>
+        <p>01/2022</p>
+        <p>• Step1: Taking images of traditional bookkeeping records.<br>• Step2: Extracting texts from images.<br>• Step3: Using Google Sheets and translating to English.<br>• Step4: UIPath & Selenium automation.<br>• Step5: Inputting processed data into national database.<br>• Step6: Human verification and validation.</p>
+    </div>
+</div>
+</div>
+
 <!-- Academic Projects (Updated Section) -->
 <div class="projects-card">
 <h2>Academic Projects</h2>
@@ -243,11 +294,11 @@ h1 { margin-bottom: 10px; font-size: 28px; }
             3. How does attendance impact academic performance in the BDEEM Economics program, particularly for scholarship recipients compared to non-recipients?<br>
             4. How do the Matthew and Pygmalion Effects influence the academic success of scholarship recipients, particularly in terms of compounding advantages and higher expectations?
         </p>
-        <div class="project-footer" style="font-size: 13px;">
-            <span>
-                Conclusions from Report: 
-                <img src="/images/projectE.png" alt="Profile">
-            </span>
+        <div class="project-footer" style="font-size: 13px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            <span>Conclusions from Report:</span>
+            <div style="display:flex; gap:5px;">
+                <img src="/images/projectE.png" alt="Project E" style="width:60px; height:60px; object-fit:cover; border-radius:8px;">
+            </div>
         </div>
     </div>
 
@@ -264,12 +315,12 @@ h1 { margin-bottom: 10px; font-size: 28px; }
             3. Identification of major factors affecting and shaping the policy.<br>
             4. Challenges and limitations of the study, with a focus on the comparison between the old model and the new model.<br>
         </p>
-        <div class="project-footer" style="font-size: 13px;">
-            <span>
-                Conclusions from Report: 
-                <img src="/images/projectK.png" alt="Profile">
-                <img src="/images/projectEQ.png" alt="Profile">
-            </span>
+        <div class="project-footer" style="font-size: 13px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            <span>Conclusions from Report:</span>
+            <div style="display:flex; gap:5px;">
+                <img src="/images/projectK.png" alt="Project K" style="width:60px; height:60px; object-fit:cover; border-radius:8px;">
+                <img src="/images/projectEQ.png" alt="Project EQ" style="width:60px; height:60px; object-fit:cover; border-radius:8px;">
+            </div>
         </div>
     </div>
 
