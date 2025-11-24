@@ -297,7 +297,7 @@ h1 { margin-bottom: 10px; font-size: 28px; }
         <div class="project-footer" style="font-size: 13px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
             <span>Conclusions from Report:</span>
             <div style="display:flex; gap:5px;">
-                <img src="/images/projectE.png" alt="Project E" style="width:60px; height:60px; object-fit:cover; border-radius:8px;">
+                <img src="/images/projectE.png" alt="Project E" style="width:600px; height:600px; object-fit:cover; border-radius:8px;">
             </div>
         </div>
     </div>
@@ -305,7 +305,7 @@ h1 { margin-bottom: 10px; font-size: 28px; }
     <div class="project-card" id="competition-policy">
         <h3>Analyzing the Dynamics of Competition Policy: Insights from Antitrust and Growth</h3>
         <p>
-            <strong>M1 Project: Competition Policy</strong><br><br>
+            <strong>M1 Project: Competition Policy</strong><br>
             <i class="fa-regular fa-building"></i> M1, BDEEM <br>
             <i class="fa-solid fa-clock"></i> 12/2024 <br><br>
             <em>Analyzing the Dynamics of Competition Policy</em><br><br>
@@ -316,11 +316,35 @@ h1 { margin-bottom: 10px; font-size: 28px; }
             4. Challenges and limitations of the study, with a focus on the comparison between the old model and the new model.<br>
         </p>
         <div class="project-footer" style="font-size: 13px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-            <span>Conclusions from Report:</span>
-            <div style="display:flex; gap:5px;">
-                <img src="/images/projectK.png" alt="Project K" style="width:60px; height:60px; object-fit:cover; border-radius:8px;">
-                <img src="/images/projectEQ.png" alt="Project EQ" style="width:60px; height:60px; object-fit:cover; border-radius:8px;">
-            </div>
+        
+          <div class="project-footer" style="font-size: 13px;">
+    <span>Conclusions from Report:</span>
+    <div class="carousel-container" style="position:relative; overflow:hidden; width:100%; margin-top:5px; border-radius:8px;">
+        <div class="carousel-slides" style="display:flex; transition: transform 0.5s ease;">
+            <img src="/images/projectK.png" alt="Project K" style="width:100%; object-fit:cover;">
+            <img src="/images/projectEQ.png" alt="Project EQ" style="width:100%; object-fit:cover;">
+        </div>
+    </div>
+</div>
+
+<script>
+function initCarousel() {
+    const carousels = document.querySelectorAll('.carousel-container');
+    carousels.forEach(carousel => {
+        const slides = carousel.querySelector('.carousel-slides');
+        const totalSlides = slides.children.length;
+        let index = 0;
+
+        setInterval(() => {
+            index = (index + 1) % totalSlides;
+            slides.style.transform = `translateX(-${index * 100}%)`;
+        }, 3000); // 3s interval
+    });
+}
+
+document.addEventListener('DOMContentLoaded', initCarousel);
+</script>
+
         </div>
     </div>
 
