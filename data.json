@@ -2,7 +2,7 @@
   "personal": {
     "name": "THAPA Sanus",
     "title": ["Data Scientist", "Digital Economist", "AI/ML Enthusiast"],
-    "avatar": "./assets/images/profile_pic.jpeg",
+    "avatar": "/assets/images/profile_pic.jpeg",
     "email": "sanuzh.thapa@gmail.com",
     "phone": "+33 7 53 83 83 32",
     "location": "Besancon(25000), FR",
