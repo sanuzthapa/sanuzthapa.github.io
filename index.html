@@ -14,7 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
   <style>
-   
+    /* --- 1. CUSTOM THIN SCROLLBAR --- */
     ::-webkit-scrollbar {
       width: 2px;
       height: 6px;
@@ -1073,7 +1073,7 @@
       // Contact PDF Viewer
       const cvViewer = document.getElementById('cv-viewer');
       const cvFallback = document.getElementById('cv-fallback-link');
-      const resumeUrl = data.contact.resumePdf || data.resumePdf || './assets/documents/resume.pdf';
+      const resumeUrl = data.contact.resumePdf || data.resumePdf || 'https://github.com/sanuzthapa/testwebp.github.io/blob/main/assets/documents/resume_sanuz_DS.pdf';
       if(cvViewer) cvViewer.setAttribute('data', resumeUrl);
       if(cvFallback) cvFallback.setAttribute('href', resumeUrl);
 
