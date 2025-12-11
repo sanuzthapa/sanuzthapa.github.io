@@ -384,8 +384,14 @@
 
   <script>
     let githubRepos = []; 
+
     fetch('data.json')
-      .then(res => res.json())
+      .then(response => {
+        if (!response.ok) {
+            throw new Error("HTTP error " + response.status + " reading data.json");
+        }
+        return response.json();
+      })
       .then(data => {
         initPersonal(data);
         initAbout(data);
@@ -393,29 +399,47 @@
         initCertifications(data); 
         initPortfolio(data);
         
+        // Contact & Socials
         if(data.personal.email) document.getElementById('c-email').textContent = data.personal.email;
         if(data.personal.phone) document.getElementById('c-phone').textContent = data.personal.phone;
         
         const lnk = document.getElementById('c-linkedin');
-        if(data.personal.social.linkedin) lnk.href = data.personal.social.linkedin;
-        else lnk.style.display = 'none';
+        if(data.personal.social && data.personal.social.linkedin) {
+            lnk.href = data.personal.social.linkedin;
+        } else {
+            lnk.style.display = 'none';
+        }
 
         const git = document.getElementById('c-github');
-        if(data.personal.social.github) git.href = data.personal.social.github;
-        else git.style.display = 'none';
+        if(data.personal.social && data.personal.social.github) {
+            git.href = data.personal.social.github;
+        } else {
+            git.style.display = 'none';
+        }
 
-        if(data.github.username) {
+        if(data.github && data.github.username) {
             document.getElementById('api-notice').textContent = data.github.notice;
             fetchGithub(data.github.username);
+        } else {
+             document.getElementById('github-list').innerHTML = '<p>No GitHub username provided in data.json</p>';
         }
+
         document.title = data.personal.name;
         startCarousels();
+      })
+      .catch(error => {
+        console.error('Error loading data:', error);
+        document.body.innerHTML = `<div style="color:white; text-align:center; padding:50px;">
+            <h1>Error Loading Site</h1>
+            <p>Could not load data.json. Check Console for details.</p>
+        </div>`;
       });
 
     function initPersonal(data) {
         document.getElementById('h-welcome').textContent = data.about.welcomeText.toUpperCase();
         document.getElementById('h-name').textContent = data.personal.name;
-        document.getElementById('h-title').textContent = Array.isArray(data.personal.title) ? data.personal.title.join(" & ") : data.personal.title;
+        const titleText = Array.isArray(data.personal.title) ? data.personal.title.join(" & ") : data.personal.title;
+        document.getElementById('h-title').textContent = titleText;
         document.getElementById('h-desc').textContent = data.about.description[0];
         document.getElementById('h-avatar').src = data.personal.avatar;
 
@@ -424,19 +448,24 @@
 
         const miniSocials = document.getElementById('h-socials');
         const map = {'linkedin': 'logo-linkedin', 'github': 'logo-github', 'website': 'globe-outline'};
-        for(let k in data.personal.social) {
-            if(data.personal.social[k] && data.personal.social[k] !== "#") {
-                miniSocials.innerHTML += `<a href="${data.personal.social[k]}" target="_blank"><ion-icon name="${map[k] || 'link'}"></ion-icon></a>`;
+        if(data.personal.social) {
+            for(let k in data.personal.social) {
+                if(data.personal.social[k] && data.personal.social[k] !== "#") {
+                    miniSocials.innerHTML += `<a href="${data.personal.social[k]}" target="_blank"><ion-icon name="${map[k] || 'link'}"></ion-icon></a>`;
+                }
             }
         }
 
         document.getElementById('s-avatar').src = data.personal.avatar;
         document.getElementById('s-name').textContent = data.personal.name;
-        //document.getElementById('s-role').textContent = "Data Scientist";
-       const roleText = Array.isArray(data.personal.role) 
-                     ? data.personal.role.join(", ") 
-                     : data.personal.role;
-                     
+        
+        // Dynamic Sidebar Role (JSON first, fallback to title)
+        let roleText = "Data Scientist"; 
+        if (data.personal.role) {
+            roleText = Array.isArray(data.personal.role) ? data.personal.role.join(" & ") : data.personal.role;
+        } else if (data.personal.title) {
+             roleText = Array.isArray(data.personal.title) ? data.personal.title[0] : data.personal.title;
+        }
         document.getElementById('s-role').textContent = roleText;
         
         const sidebarContact = document.getElementById('s-contact');
@@ -447,16 +476,20 @@
         
         const socialDiv = document.getElementById('s-social');
         socialDiv.innerHTML = '';
-        for(let k in data.personal.social) {
-            if(data.personal.social[k] && data.personal.social[k] !== "#") {
-                socialDiv.innerHTML += `<a href="${data.personal.social[k]}" target="_blank"><ion-icon name="${map[k] || 'link'}"></ion-icon></a>`;
+        if(data.personal.social) {
+            for(let k in data.personal.social) {
+                if(data.personal.social[k] && data.personal.social[k] !== "#") {
+                    socialDiv.innerHTML += `<a href="${data.personal.social[k]}" target="_blank"><ion-icon name="${map[k] || 'link'}"></ion-icon></a>`;
+                }
             }
         }
-        if(data.contact.resumePdf) document.getElementById('cv-btn').href = data.contact.resumePdf;
+        if(data.contact && data.contact.resumePdf) document.getElementById('cv-btn').href = data.contact.resumePdf;
     }
 
     function initAbout(data) {
-        data.about.description.forEach(t => document.getElementById('about-txt').innerHTML += `<p style="margin-bottom:10px;">${t}</p>`);
+        if(data.about.description) {
+            data.about.description.forEach(t => document.getElementById('about-txt').innerHTML += `<p style="margin-bottom:10px;">${t}</p>`);
+        }
         
         const serviceContainer = document.getElementById('service-list');
         serviceContainer.innerHTML = ''; 
@@ -469,57 +502,65 @@
         };
         const defaultIcon = "code-slash-outline";
 
-        data.about.services.forEach(s => {
-            const iconName = iconMap[s.title] || defaultIcon;
-            serviceContainer.innerHTML += `
-              <div class="service-box">
-                  <div class="service-icon"><ion-icon name="${iconName}"></ion-icon></div>
-                  <div class="service-text">
-                      <h4>${s.title}</h4>
-                      <p>${s.description}</p>
-                  </div>
-              </div>`;
-        });
+        if(data.about.services) {
+            data.about.services.forEach(s => {
+                const iconName = iconMap[s.title] || defaultIcon;
+                serviceContainer.innerHTML += `
+                <div class="service-box">
+                    <div class="service-icon"><ion-icon name="${iconName}"></ion-icon></div>
+                    <div class="service-text">
+                        <h4>${s.title}</h4>
+                        <p>${s.description}</p>
+                    </div>
+                </div>`;
+            });
+        }
 
         const skillDiv = document.getElementById('skill-list');
-        data.resume.skills.forEach(skill => {
-           const subSkills = skill.subskills || []; 
-           const subSkillHtml = subSkills.map(s => `<span class="sub-skill-tag">${s}</span>`).join('');
-           skillDiv.innerHTML += `
-             <div class="skill-container">
-               <div class="skill-info"><span>${skill.name}</span></div>
-               <div class="progress-bg"><div class="progress-fill" style="width:${skill.percentage}%"></div></div>
-               <div class="sub-skills">${subSkillHtml}</div>
-             </div>`;
-        });
+        if(data.resume.skills) {
+            data.resume.skills.forEach(skill => {
+            const subSkills = skill.subskills || []; 
+            const subSkillHtml = subSkills.map(s => `<span class="sub-skill-tag">${s}</span>`).join('');
+            skillDiv.innerHTML += `
+                <div class="skill-container">
+                <div class="skill-info"><span>${skill.name}</span></div>
+                <div class="progress-bg"><div class="progress-fill" style="width:${skill.percentage}%"></div></div>
+                <div class="sub-skills">${subSkillHtml}</div>
+                </div>`;
+            });
+        }
     }
 
     function initResume(data) {
         const expDiv = document.getElementById('exp-list');
-        data.experience.forEach(j => {
-            const desc = j.description.map(d => `<li>${d}</li>`).join('');
-            const skills = j.skills.map(s => `<span>#${s}</span>`).join(' ');
-            expDiv.innerHTML += `
-               <div class="t-item">
-                  <div class="meta-row highlight"><ion-icon name="briefcase-outline"></ion-icon> ${j.position}</div>
-                  <div class="meta-row company"><ion-icon name="business-outline"></ion-icon> ${j.company}</div>
-                  <div class="meta-row"><ion-icon name="calendar-outline"></ion-icon> ${j.period}</div>
-                  <div class="meta-row"><ion-icon name="location-outline"></ion-icon> ${j.location}</div>
-                  <ul class="t-desc" style="margin-top:15px; margin-bottom:15px;">${desc}</ul>
-                  <div class="p-tags">${skills}</div>
-               </div>`;
-        });
+        if(data.experience) {
+            data.experience.forEach(j => {
+                const desc = j.description.map(d => `<li>${d}</li>`).join('');
+                const skills = j.skills ? j.skills.map(s => `<span>#${s}</span>`).join(' ') : '';
+                expDiv.innerHTML += `
+                <div class="t-item">
+                    <div class="meta-row highlight"><ion-icon name="briefcase-outline"></ion-icon> ${j.position}</div>
+                    <div class="meta-row company"><ion-icon name="business-outline"></ion-icon> ${j.company}</div>
+                    <div class="meta-row"><ion-icon name="calendar-outline"></ion-icon> ${j.period}</div>
+                    <div class="meta-row"><ion-icon name="location-outline"></ion-icon> ${j.location}</div>
+                    <ul class="t-desc" style="margin-top:15px; margin-bottom:15px;">${desc}</ul>
+                    <div class="p-tags">${skills}</div>
+                </div>`;
+            });
+        }
 
         const eduDiv = document.getElementById('edu-list');
-        data.resume.education.forEach(e => {
-            eduDiv.innerHTML += `
-               <div class="t-item">
-                  <div class="meta-row highlight"><ion-icon name="school-outline"></ion-icon> ${e.degree}</div>
-                  <div class="meta-row company"><ion-icon name="business-outline"></ion-icon> ${e.institution}</div>
-                  <div class="meta-row"><ion-icon name="calendar-outline"></ion-icon> ${e.period}</div>
-                  <p style="font-size:14px; margin-top:10px;">${e.description}</p>
-               </div>`;
-        });
+        if(data.resume.education) {
+            data.resume.education.forEach(e => {
+                eduDiv.innerHTML += `
+                <div class="t-item">
+                    <div class="meta-row highlight"><ion-icon name="school-outline"></ion-icon> ${e.degree}</div>
+                    <div class="meta-row company"><ion-icon name="business-outline"></ion-icon> ${e.institution}</div>
+                    <div class="meta-row"><ion-icon name="calendar-outline"></ion-icon> ${e.period}</div>
+                    <p style="font-size:14px; margin-top:10px;">${e.description}</p>
+                </div>`;
+            });
+        }
     }
 
     function initCertifications(data) {
@@ -562,20 +603,32 @@
         });
     }
 
+    // --- FIX: Updated Portfolio Function (No External Placeholders) ---
     function initPortfolio(data) {
+        if(!data.portfolio) return;
         const filters = document.getElementById('filters');
+        
+        // Reset filters to avoid duplication
+        filters.innerHTML = ''; 
         data.portfolio.filters.forEach((f, i) => {
             filters.innerHTML += `<button class="filter-btn ${i===0?'active':''}" onclick="filterProjects(this, '${f}')">${f}</button>`;
         });
 
         const grid = document.getElementById('projects');
+        grid.innerHTML = ''; // Clear projects
+
         data.portfolio.projects.forEach((p, idx) => {
             const cats = Array.isArray(p.category) ? p.category.join(',') : p.category;
             const desc = Array.isArray(p.description) ? `<ul>${p.description.map(d=>`<li>${d}</li>`).join('')}</ul>` : `<p>${p.description}</p>`;
             
             let mediaHtml = '';
+            
             if(p.images && p.images.length > 0) {
-                 const imgs = p.images.map(src => `<img src="${src}" onerror="this.src='https://via.placeholder.com/600x400/112240/64ffda?text=No+Image'">`).join('');
+                 // --- FIX: Just hide image on error, do NOT fetch via.placeholder ---
+                 const imgs = p.images.map(src => {
+                     return `<img src="${src}" alt="${p.title}" onerror="this.style.display='none'">`;
+                 }).join('');
+                 
                  const carouselClass = p.images.length > 1 ? 'carousel-slides' : 'static-img';
                  mediaHtml = `
                     <div class="carousel-container">
@@ -584,9 +637,12 @@
                         </a>
                     </div>`;
             } else {
+                 // Default Folder Icon if no images list exists in JSON
                  mediaHtml = `<div class="carousel-container" style="background:#112240; display:flex; align-items:center; justify-content:center; color:var(--green); font-size:40px;"><ion-icon name="folder-open"></ion-icon></div>`;
             }
+
             const btnText = p.btnText || "View Project";
+            
             grid.innerHTML += `
                <div class="project-card proj-item" data-cat="${cats}">
                   ${mediaHtml}
@@ -622,11 +678,25 @@
         const container = document.getElementById('github-list');
         try {
             const res = await fetch(`https://api.github.com/users/${username}/repos?sort=updated&per_page=100`);
-            if(!res.ok) throw new Error("Github API Limit");
+            
+            if(res.status === 403) {
+                throw new Error("GitHub API Limit Reached (Wait 1hr)");
+            }
+            if(!res.ok) {
+                throw new Error("GitHub User Not Found");
+            }
+            
             githubRepos = await res.json();
+            
+            if(githubRepos.length === 0) {
+                 container.innerHTML = '<p>No public repositories found.</p>';
+                 return;
+            }
             renderGithub(6);
+            
         } catch(e) {
-            container.innerHTML = `<p style="color:var(--slate);">Unable to load repositories.</p>`;
+            console.error(e);
+            container.innerHTML = `<p style="color:var(--slate); border:1px solid red; padding:10px; border-radius:4px;">${e.message}</p>`;
         }
     }
 
@@ -667,21 +737,19 @@
         });
     }
 
-    // --- UPDATED SCROLL LOGIC ---
+    // --- SCROLL NAVIGATION LOGIC ---
     window.addEventListener('scroll', () => {
         const sections = document.querySelectorAll('section');
         const links = document.querySelectorAll('.nav-link');
         let current = '';
 
-        // Check if we are at the bottom of the page
+        // If we hit the bottom of the page, forcefully select 'Contact'
         if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 50) {
              current = 'contact'; 
         } else {
-             // Standard scroll check with adjusted buffer
              sections.forEach(s => {
-                 const sectionTop = s.offsetTop;
-                 // 300px buffer to trigger active state earlier
-                 if(window.scrollY >= (sectionTop - 300)) {
+                 // Trigger active state 300px before reaching the exact top
+                 if(window.scrollY >= (s.offsetTop - 300)) {
                      current = s.getAttribute('id');
                  }
              });
@@ -694,6 +762,7 @@
             }
         });
         
+        // Hero Fade Effect
         const hero = document.querySelector('.hero-content');
         if(window.scrollY < 800) {
             hero.style.opacity = 1 - (window.scrollY / 600);
