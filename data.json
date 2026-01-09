@@ -251,8 +251,9 @@
   },
   "github": {
     "username": "sanuzthapa",
-    "notice": "Notice: These repositories are fetched automatically using the GitHub API to demonstrate API integration skills."
+    "notice": "Notice: These repositories are fetched automatically using the GitHub API."
   }
 
 }
+
 
