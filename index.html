@@ -44,11 +44,46 @@
     ::-webkit-scrollbar-thumb { background: var(--lightest-navy); border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: var(--green); }
 
+    /* --- TOP GLOBAL NAVIGATION --- */
+    .top-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      padding: 0 5%;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 25px;
+      z-index: 1000;
+      background: rgba(10, 25, 47, 0.85);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--lightest-navy);
+    }
+    .top-nav a {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--light-slate);
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition);
+    }
+    .top-nav a:hover,
+    .top-nav a.active {
+      color: var(--green);
+    }
+    .top-nav a.active {
+      font-weight: 600;
+    }
+
     /* --- HERO SECTION --- */
     .hero-section {
       position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
       background-color: var(--navy); display: flex; align-items: center; justify-content: center;
-      z-index: 0; padding: 0 5%;
+      z-index: 0; padding: 60px 5% 0; /* extra top padding for top-nav */
     }
     .hero-content { 
       display: flex; align-items: center; justify-content: space-between; 
@@ -93,7 +128,7 @@
     .container { max-width: 1400px; margin: 0 auto; padding: 80px 20px; display: flex; gap: 40px; }
 
     /* Sidebar */
-    .sidebar { width: 300px; flex-shrink: 0; position: sticky; top: 30px; height: fit-content; background: var(--light-navy); border-radius: 6px; padding: 30px; text-align: center; border: 1px solid var(--lightest-navy); }
+    .sidebar { width: 300px; flex-shrink: 0; position: sticky; top: 80px; height: fit-content; background: var(--light-navy); border-radius: 6px; padding: 30px; text-align: center; border: 1px solid var(--lightest-navy); }
     .sidebar-img { width: 120px; height: 120px; border-radius: 50%; margin: 0 auto 15px; border: 2px solid var(--green); object-fit: cover; }
     .sidebar h2 { color: var(--white); font-size: 1.4rem; font-weight: 700; margin-bottom: 5px; }
     .sidebar-role { color: var(--green); font-family: var(--font-mono); font-size: 0.8rem; margin-bottom: 25px; display: block; }
@@ -106,12 +141,12 @@
 
     /* Content */
     .content { flex: 1; min-width: 0; }
-    .navbar { position: sticky; top: 0; z-index: 50; background: rgba(10, 25, 47, 0.95); backdrop-filter: blur(10px); display: flex; justify-content: flex-end; padding: 10px 0; margin-bottom: 40px; border-bottom: 1px solid var(--lightest-navy); overflow-x: auto; }
+    .navbar { position: sticky; top: 60px; z-index: 50; background: rgba(10, 25, 47, 0.95); backdrop-filter: blur(10px); display: flex; justify-content: flex-end; padding: 10px 0; margin-bottom: 40px; border-bottom: 1px solid var(--lightest-navy); overflow-x: auto; }
     .nav-link { padding: 15px 20px; color: var(--light-slate); font-family: var(--font-mono); font-size: 13px; white-space: nowrap; cursor: pointer;}
     .nav-link span { color: var(--green); }
     .nav-link:hover, .nav-link.active { color: var(--green); border-bottom: 2px solid var(--green); }
 
-    section { margin-bottom: 100px; scroll-margin-top: 100px; }
+    section { margin-bottom: 100px; scroll-margin-top: 120px; }
     .sec-head { display: flex; align-items: center; color: var(--white); font-size: 26px; margin-bottom: 30px; font-weight: 700; }
     .sec-head::after { content:""; display: block; height: 1px; flex: 1; background: var(--lightest-navy); margin-left: 20px; }
     .sec-head span { color: var(--green); font-family: var(--font-mono); font-size: 20px; margin-right: 10px; font-weight: 400; }
@@ -137,7 +172,6 @@
     /* --- CERTIFICATIONS (Grid + Image) --- */
     .cert-grid { 
         display: grid; 
-        /* Responsive Grid: min 250px wide cards */
         grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
         gap: 25px; 
     }
@@ -156,7 +190,7 @@
     
     .cert-img-box {
         width: 100%;
-        height: 160px; /* Fixed height for consistency */
+        height: 160px;
         background-color: var(--lightest-navy);
         overflow: hidden;
         position: relative;
@@ -169,7 +203,6 @@
     }
     .cert-card:hover .cert-img-box img { transform: scale(1.05); }
     
-    /* Overlay icon if no image or error */
     .cert-placeholder {
         width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
         color: var(--green); font-size: 3rem;
@@ -190,7 +223,6 @@
         display: flex; align-items: center; gap: 5px;
     }
     .cert-link-btn:hover { border-color: var(--green); color: var(--green); }
-
 
     /* Timeline */
     .timeline { border-left: 2px solid var(--lightest-navy); margin-left: 5px; padding-left: 25px; margin-bottom: 50px; }
@@ -246,7 +278,8 @@
 
     /* Responsive */
     @media (max-width: 900px) {
-      .hero-content { flex-direction: column-reverse; padding-top: 80px; text-align: center; }
+      .top-nav { justify-content: center; }
+      .hero-content { flex-direction: column-reverse; padding-top: 100px; text-align: center; }
       .hero-text { max-width: 100%; }
       .hero-btns, .hero-tags, .hero-mini-socials { justify-content: center; }
       .hero-img-box { width: 300px; height: 380px; margin: 0 auto; }
@@ -259,6 +292,13 @@
   </style>
 </head>
 <body>
+
+  <!-- Top Global Navigation Bar -->
+  <header class="top-nav">
+    <a href="#" class="active"><ion-icon name="person-outline"></ion-icon> Portfolio</a>
+    <a href="https://sanuzthapa.github.io/blog/" target="_blank"><ion-icon name="newspaper-outline"></ion-icon> Blog</a>
+    <a href="#contact"><ion-icon name="mail-outline"></ion-icon> Contact</a>
+  </header>
 
   <section class="hero-section">
     <div class="hero-content">
@@ -603,19 +643,17 @@
         });
     }
 
-    // --- FIX: Updated Portfolio Function (No External Placeholders) ---
     function initPortfolio(data) {
         if(!data.portfolio) return;
         const filters = document.getElementById('filters');
         
-        // Reset filters to avoid duplication
         filters.innerHTML = ''; 
         data.portfolio.filters.forEach((f, i) => {
             filters.innerHTML += `<button class="filter-btn ${i===0?'active':''}" onclick="filterProjects(this, '${f}')">${f}</button>`;
         });
 
         const grid = document.getElementById('projects');
-        grid.innerHTML = ''; // Clear projects
+        grid.innerHTML = '';
 
         data.portfolio.projects.forEach((p, idx) => {
             const cats = Array.isArray(p.category) ? p.category.join(',') : p.category;
@@ -624,7 +662,6 @@
             let mediaHtml = '';
             
             if(p.images && p.images.length > 0) {
-                 // --- FIX: Just hide image on error, do NOT fetch via.placeholder ---
                  const imgs = p.images.map(src => {
                      return `<img src="${src}" alt="${p.title}" onerror="this.style.display='none'">`;
                  }).join('');
@@ -637,7 +674,6 @@
                         </a>
                     </div>`;
             } else {
-                 // Default Folder Icon if no images list exists in JSON
                  mediaHtml = `<div class="carousel-container" style="background:#112240; display:flex; align-items:center; justify-content:center; color:var(--green); font-size:40px;"><ion-icon name="folder-open"></ion-icon></div>`;
             }
 
@@ -743,12 +779,10 @@
         const links = document.querySelectorAll('.nav-link');
         let current = '';
 
-        // If we hit the bottom of the page, forcefully select 'Contact'
         if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 50) {
              current = 'contact'; 
         } else {
              sections.forEach(s => {
-                 // Trigger active state 300px before reaching the exact top
                  if(window.scrollY >= (s.offsetTop - 300)) {
                      current = s.getAttribute('id');
                  }
