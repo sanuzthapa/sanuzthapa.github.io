@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bulldozer Price Prediction: Kaggle Regression Breakdown</title>
+  <meta name="category" content="AI/ML">
+  <meta name="date" content="2026-01-25">
+  <meta name="description" content="Optimizing heavy equipment auction price prediction: achieving top-30 Kaggle RMSLE (0.24) with Random Forest and custom time-series cross validation.">
+  <meta name="status" content="Production Ready">
+  <meta name="tags" content="Scikit-Learn, Regression, EDA, Kaggle">
+  <meta name="author" content="Sanuz Thapa">
+  <meta name="readingTime" content="5 min read">
+  <style>
+    :root {
+      --bg: #0a192f;
+      --card-bg: #112240;
+      --border: #233554;
+      --accent: #64ffda;
+      --text: #e6f1ff;
+      --muted: #8892b0;
+      --font: 'Inter', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      line-height: 1.6;
+      padding: 40px 24px;
+    }
+    .container { max-width: 960px; margin: 0 auto; }
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      background: rgba(100, 255, 218, 0.1);
+      color: var(--accent);
+      border: 1px solid rgba(100, 255, 218, 0.3);
+      margin-bottom: 16px;
+    }
+    h1 { font-size: 2.2rem; color: #fff; margin-bottom: 12px; }
+    .meta-bar {
+      display: flex;
+      gap: 20px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 24px;
+      margin-bottom: 30px;
+    }
+    .meta-bar span { color: var(--accent); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin: 24px 0; }
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 20px; }
+    .stat-num { font-size: 1.8rem; font-weight: 700; color: var(--accent); font-family: var(--font-mono); }
+    .stat-label { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    pre {
+      background: #060d1d;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      margin: 20px 0;
+      color: #ccd6f6;
+    }
+    code { font-family: var(--font-mono); color: var(--accent); }
+    p { margin-bottom: 18px; color: #a8b2d1; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="badge">MACHINE LEARNING • REGRESSION</div>
+    <h1>Bulldozer Price Prediction: Kaggle Regression Breakdown</h1>
+    <div class="meta-bar">
+      <div>Author: <span>Sanuz Thapa</span></div>
+      <div>Metric: <span>RMSLE &lt; 0.245</span></div>
+      <div>Dataset: <span>Blue Book for Bulldozers</span></div>
+      <div>Rank: <span>Top 30 Kaggle</span></div>
+    </div>
+
+    <p>
+      Predicting auction prices for used industrial excavators and bulldozers is notoriously challenging due to heavy missing data (>50% across 53 features), temporal drift, and multi-tier categorical variables.
+    </p>
+
+    <div class="grid">
+      <div class="card">
+        <div class="stat-num">0.242</div>
+        <div class="stat-label">Final Test RMSLE</div>
+      </div>
+      <div class="card">
+        <div class="stat-num">412,698</div>
+        <div class="stat-label">Training Records</div>
+      </div>
+      <div class="card">
+        <div class="stat-num">100</div>
+        <div class="stat-label">Estimators in RF Ensemble</div>
+      </div>
+    </div>
+
+    <h2 style="color:#fff; margin:30px 0 16px;">Feature Engineering Pipeline</h2>
+    <p>
+      Date decomposition played a decisive role: extracting <code>saleYear</code>, <code>saleMonth</code>, <code>saleDay</code>, <code>saleDayOfWeek</code>, and <code>saleDayOfYear</code> uncovered seasonal liquidity patterns in the construction market.
+    </p>
+
+    <pre><code>def add_date_features(df, date_col):
+    df["saleYear"] = df[date_col].dt.year
+    df["saleMonth"] = df[date_col].dt.month
+    df["saleDay"] = df[date_col].dt.day
+    df["saleDayOfWeek"] = df[date_col].dt.dayofweek
+    df["saleDayOfYear"] = df[date_col].dt.dayofyear
+    df.drop(date_col, axis=1, inplace=True)
+    return df</code></pre>
+  </div>
+</body>
+</html>
+
