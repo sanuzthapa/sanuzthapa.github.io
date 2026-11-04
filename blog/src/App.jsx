@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Terminal,
   ExternalLink,
@@ -18,7 +18,8 @@ import {
   X,
   Layers,
   Cpu,
-  Monitor
+  Monitor,
+  LayoutGrid
 } from 'lucide-react';
 import { getHtmlProjects } from './lib/loadHtmlProjects';
 
@@ -35,15 +36,16 @@ export default function App() {
   const [activeProject, setActiveProject] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [activeTab, setActiveTab] = useState('articles'); // 'articles' | 'cli' | 'guide'
+  const [activeTab, setActiveTab] = useState('articles');
   const [copiedCmd, setCopiedCmd] = useState('');
+  const [isShrunk, setIsShrunk] = useState(false);
+  const iframeRef = useRef(null);
 
-  // 1. Auto-discover all HTML projects on mount
+  // 1. Auto-discover all HTML projects on mount & sync hash
   useEffect(() => {
     const loadedProjects = getHtmlProjects();
     setProjects(loadedProjects);
 
-    // Sync with URL Hash for direct deep-linking (e.g. #competition-policy-sim)
     const handleHashSync = () => {
       const hash = window.location.hash.replace(/^#\/?/, '').trim();
       if (hash) {
@@ -52,10 +54,12 @@ export default function App() {
         );
         if (found) {
           setActiveProject(found);
+          setIsShrunk(false);
           return;
         }
       }
       setActiveProject(null);
+      setIsShrunk(false);
     };
 
     handleHashSync();
@@ -63,20 +67,55 @@ export default function App() {
     return () => window.removeEventListener('hashchange', handleHashSync);
   }, []);
 
-  // Open an article in full-screen iframe view
+  // 2. Scroll listener inside iframe & parent window for smooth shrinking
+  useEffect(() => {
+    if (!activeProject) {
+      setIsShrunk(false);
+      return;
+    }
+
+    const checkIframeScroll = () => {
+      try {
+        const iframeWin = iframeRef.current?.contentWindow;
+        if (iframeWin) {
+          const onScroll = () => {
+            const y = iframeWin.scrollY || iframeWin.pageYOffset || 0;
+            setIsShrunk(y > 35);
+          };
+          iframeWin.addEventListener('scroll', onScroll, { passive: true });
+          return () => iframeWin.removeEventListener('scroll', onScroll);
+        }
+      } catch (err) {
+        // Fallback if cross-origin
+      }
+    };
+
+    const handleWindowScroll = () => {
+      setIsShrunk(window.scrollY > 35);
+    };
+
+    window.addEventListener('scroll', handleWindowScroll, { passive: true });
+    const timer = setTimeout(checkIframeScroll, 400);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('scroll', handleWindowScroll);
+    };
+  }, [activeProject]);
+
   const handleOpenProject = (project) => {
     setActiveProject(project);
+    setIsShrunk(false);
     window.location.hash = project.slug;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Close the article and return to catalog feed
   const handleCloseProject = () => {
     setActiveProject(null);
+    setIsShrunk(false);
+    setActiveTab('articles');
     history.pushState('', document.title, window.location.pathname + window.location.search);
   };
 
-  // Extract categories dynamically
   const categories = useMemo(() => {
     const set = new Set(['All']);
     projects.forEach((p) => {
@@ -85,7 +124,6 @@ export default function App() {
     return Array.from(set);
   }, [projects]);
 
-  // Filtered projects
   const filteredProjects = useMemo(() => {
     return projects.filter((project) => {
       const matchesCategory =
@@ -116,17 +154,26 @@ export default function App() {
       }`}
     >
       {/* =========================================================================
-          1. PERSISTENT TOP NAVIGATION BAR (Exact dark navbar from specifications)
-         ========================================================================= */}
-      <header className="sticky top-0 z-50 h-16 bg-[#0a192f]/95 backdrop-blur-md border-b border-[#233554] px-4 md:px-6 flex items-center justify-between select-none">
-        {/* Left: Square logo + Name + Pill + Subtitle */}
-        <div className="flex items-center gap-3">
+          PERSISTENT TOP NAVIGATION BAR WITH ANIMATED DOCKING & ARTICLES INTEGRATION
+          ========================================================================= */}
+      <header
+        className={`fixed z-50 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] select-none ${
+          activeProject && isShrunk
+            ? /* SHRUNK STATE: Compact glass floating capsule on top-right */
+              'top-4 right-4 left-auto w-auto max-w-[95vw] h-11 px-3 py-1.5 rounded-full bg-[#0a192f]/92 backdrop-blur-xl border border-[#64ffda]/40 shadow-[0_12px_40px_rgba(0,0,0,0.65)] justify-end gap-2.5 opacity-100'
+            : /* FULL EXPANDED STATE */
+              'top-0 left-0 right-0 w-full h-16 px-4 md:px-6 bg-[#0a192f]/95 backdrop-blur-md border-b border-[#233554] justify-between shadow-none'
+        } flex items-center`}
+      >
+        {/* Left Branding (smoothly fades and collapses when shrunk) */}
+        <div
+          className={`flex items-center gap-3 transition-all duration-300 ${
+            activeProject && isShrunk ? 'w-0 opacity-0 overflow-hidden pointer-events-none' : 'opacity-100'
+          }`}
+        >
           <button
-            onClick={() => {
-              setActiveTab('articles');
-              handleCloseProject();
-            }}
-            className="flex items-center gap-3 text-left focus:outline-none group"
+            onClick={handleCloseProject}
+            className="flex items-center gap-3 text-left focus:outline-none group cursor-pointer"
             title="Return to Engineering Journal Catalog"
           >
             <div className="w-10 h-10 rounded-lg bg-[#64ffda]/10 border border-[#64ffda]/30 flex items-center justify-center text-[#64ffda] shadow-sm group-hover:bg-[#64ffda]/20 group-hover:border-[#64ffda] transition-all">
@@ -148,144 +195,149 @@ export default function App() {
           </button>
         </div>
 
-        {/* Center: Nav Tabs ("All Articles & Projects", "CLI Run Sandbox", "GitHub Pages Guide") */}
-        <nav className="hidden lg:flex items-center gap-1 bg-[#112240]/80 border border-[#233554] p-1 rounded-lg">
-          <button
-            onClick={() => {
-              setActiveTab('articles');
-              if (activeProject) handleCloseProject();
-            }}
-            className={`px-3 py-1.5 rounded-md text-xs font-mono font-medium transition-all ${
-              activeTab === 'articles' && !activeProject
-                ? 'bg-[#64ffda]/15 text-[#64ffda] border border-[#64ffda]/30 shadow-sm'
-                : 'text-[#8892b0] hover:text-white hover:bg-[#233554]/50'
-            }`}
-          >
-            All Articles & Projects
-          </button>
+        {/* Center: "All Articles & Projects" Tab System in Home Mode */}
+        {!activeProject && (
+          <nav className="hidden lg:flex items-center gap-1 bg-[#112240]/80 border border-[#233554] p-1 rounded-lg">
+            <button
+              onClick={() => {
+                setActiveTab('articles');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-mono font-medium transition-all ${
+                activeTab === 'articles'
+                  ? 'bg-[#64ffda]/15 text-[#64ffda] border border-[#64ffda]/30 shadow-sm'
+                  : 'text-[#8892b0] hover:text-white hover:bg-[#233554]/50'
+              }`}
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              <span>All Articles & Projects</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('cli')}
+              className={`px-3 py-1.5 rounded-md text-xs font-mono font-medium transition-all ${
+                activeTab === 'cli'
+                  ? 'bg-[#64ffda]/15 text-[#64ffda] border border-[#64ffda]/30 shadow-sm'
+                  : 'text-[#8892b0] hover:text-white hover:bg-[#233554]/50'
+              }`}
+            >
+              CLI Run Sandbox
+            </button>
+            <button
+              onClick={() => setActiveTab('guide')}
+              className={`px-3 py-1.5 rounded-md text-xs font-mono font-medium transition-all ${
+                activeTab === 'guide'
+                  ? 'bg-[#64ffda]/15 text-[#64ffda] border border-[#64ffda]/30 shadow-sm'
+                  : 'text-[#8892b0] hover:text-white hover:bg-[#233554]/50'
+              }`}
+            >
+              GitHub Pages Guide
+            </button>
+          </nav>
+        )}
 
-          <button
-            onClick={() => setActiveTab('cli')}
-            className={`px-3 py-1.5 rounded-md text-xs font-mono font-medium transition-all ${
-              activeTab === 'cli'
-                ? 'bg-[#64ffda]/15 text-[#64ffda] border border-[#64ffda]/30 shadow-sm'
-                : 'text-[#8892b0] hover:text-white hover:bg-[#233554]/50'
-            }`}
-          >
-            CLI Run Sandbox
-          </button>
-
-          <button
-            onClick={() => setActiveTab('guide')}
-            className={`px-3 py-1.5 rounded-md text-xs font-mono font-medium transition-all ${
-              activeTab === 'guide'
-                ? 'bg-[#64ffda]/15 text-[#64ffda] border border-[#64ffda]/30 shadow-sm'
-                : 'text-[#8892b0] hover:text-white hover:bg-[#233554]/50'
-            }`}
-          >
-            GitHub Pages Guide
-          </button>
-        </nav>
-
-        {/* Right Action CTAs ("Portfolio Home", GitHub link) */}
-        <div className="flex items-center gap-2.5">
-          <a
-            href="../"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-mono font-medium text-slate-300 hover:text-[#64ffda] hover:bg-[#112240] border border-[#233554] transition-all"
-            title="Navigate to portfolio homepage"
-          >
-            <Globe className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Portfolio Home</span>
-          </a>
-
-          <a
-            href="https://github.com/sanuzthapa"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-mono font-medium bg-[#64ffda]/10 text-[#64ffda] hover:bg-[#64ffda]/20 border border-[#64ffda]/30 transition-all"
-            title="Sanuz Thapa's GitHub Profile"
-          >
-            <GithubIcon className="w-3.5 h-3.5" />
-            <span>GitHub</span>
-          </a>
-        </div>
-      </header>
-
-      {/* =========================================================================
-          SLIM SUB-BAR DIRECTLY BELOW NAVBAR (Height ~41px)
-         ========================================================================= */}
-      <div className="h-[41px] bg-[#0d1c38] border-b border-[#233554] px-4 md:px-6 flex items-center justify-between text-xs font-mono z-40 select-none">
+        {/* Right Section: Blog Active Mode (Expanded & Shrunk Docked state) */}
         {activeProject ? (
-          <>
-            {/* 1. < Back to All Projects & Articles button */}
+          <div className="flex items-center gap-2 text-xs font-mono">
+            {/* Integrated "All Articles & Projects" Action Button */}
             <button
               onClick={handleCloseProject}
-              className="inline-flex items-center gap-1.5 text-slate-300 hover:text-[#64ffda] transition-colors font-medium group cursor-pointer"
+              className={`inline-flex items-center gap-1.5 transition-all font-medium rounded-full cursor-pointer ${
+                isShrunk
+                  ? 'px-2.5 py-1 text-[#64ffda] bg-[#64ffda]/10 hover:bg-[#64ffda]/20 border border-[#64ffda]/30 text-[11px]'
+                  : 'px-3 py-1.5 text-slate-200 hover:text-[#64ffda] hover:bg-[#112240] border border-[#233554]'
+              }`}
+              title="Return to All Articles & Projects feed"
             >
-              <ChevronLeft className="w-4 h-4 text-[#64ffda] transition-transform group-hover:-translate-x-0.5" />
-              <span>Back to All Projects & Articles</span>
+              <ChevronLeft className="w-4 h-4 text-[#64ffda]" />
+              <LayoutGrid className="w-3.5 h-3.5 text-[#64ffda]" />
+              <span className="font-semibold">All Articles & Projects</span>
             </button>
 
-            {/* 2. Status badge (e.g. • Production Ready) + title */}
-            <div className="hidden md:flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#64ffda]/15 text-[#64ffda] border border-[#64ffda]/30">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#64ffda] animate-pulse"></span>
-                {activeProject.status || '• Production Ready'}
-              </span>
-              <span className="text-[#8892b0]/50">•</span>
-              <span className="text-slate-300 font-medium truncate max-w-sm lg:max-w-md">
-                {activeProject.title}
-              </span>
-            </div>
+            {/* Truncated Article Title (shown when space permits) */}
+            <span className="text-slate-300 max-w-[140px] sm:max-w-[200px] md:max-w-[260px] truncate hidden md:inline border-l border-[#233554] pl-2">
+              {activeProject.title}
+            </span>
 
-            {/* 3. Link: Open in standalone window ↗ */}
+            {/* Standalone Window link */}
             <a
               href={activeProject.standaloneUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-[#64ffda] hover:text-[#a8ffea] hover:underline transition-colors font-medium"
+              className="p-1.5 text-[#8892b0] hover:text-[#64ffda] hover:bg-[#112240] rounded transition-colors"
+              title="Open standalone article in new tab"
             >
-              <span>Open in standalone window</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </a>
-          </>
-        ) : (
-          <>
-            {/* Main feed sub-bar state */}
-            <div className="flex items-center gap-2 text-[#8892b0]">
-              <Sparkles className="w-3.5 h-3.5 text-[#64ffda]" />
-              <span className="font-medium text-slate-300">Catalog Feed</span>
-              <span className="text-[#8892b0]/50">•</span>
-              <span className="hidden sm:inline text-[#8892b0]">
-                Auto-Discovered HTML Projects from <code className="text-[#64ffda]">blog/public/posts/*.html</code>
-              </span>
-            </div>
 
-            <div className="flex items-center gap-3">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#64ffda]/10 text-[#64ffda] border border-[#64ffda]/20">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#64ffda]"></span>
-                • Production Ready
-              </span>
-              <span className="text-[11px] text-[#8892b0] hidden sm:inline">
-                {projects.length} articles indexed
-              </span>
-            </div>
-          </>
+            {/* Close cross */}
+            <button
+              onClick={handleCloseProject}
+              className="p-1.5 text-slate-400 hover:text-white hover:bg-[#112240] rounded transition-colors cursor-pointer"
+              title="Close article"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        ) : (
+          /* Standard Right CTA Buttons in Home View */
+          <div className="flex items-center gap-2.5">
+            <a
+              href="../"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-mono font-medium text-slate-300 hover:text-[#64ffda] hover:bg-[#112240] border border-[#233554] transition-all"
+            >
+              <Globe className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Portfolio Home</span>
+            </a>
+            <a
+              href="https://github.com/sanuzthapa"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-mono font-medium bg-[#64ffda]/10 text-[#64ffda] hover:bg-[#64ffda]/20 border border-[#64ffda]/30 transition-all"
+            >
+              <GithubIcon className="w-3.5 h-3.5" />
+              <span>GitHub</span>
+            </a>
+          </div>
         )}
-      </div>
+      </header>
 
       {/* =========================================================================
-          2. CORE CONTENT AREA
-             Case A: Active Project -> Full-Screen Edge-to-Edge Webpage Render
-             Case B: Catalog Grid Feed (Home View)
-         ========================================================================= */}
+          SLIM SUB-BAR (Catalog Feed only - Hidden when viewing an article)
+          ========================================================================= */}
+      {!activeProject && (
+        <div className="mt-16 h-[41px] bg-[#0d1c38] border-b border-[#233554] px-4 md:px-6 flex items-center justify-between text-xs font-mono z-30 select-none">
+          <div className="flex items-center gap-2 text-[#8892b0]">
+            <Sparkles className="w-3.5 h-3.5 text-[#64ffda]" />
+            <span className="font-medium text-slate-300">Catalog Feed</span>
+            <span className="text-[#8892b0]/50">•</span>
+            <span className="hidden sm:inline text-[#8892b0]">
+              Auto-Discovered HTML Projects from <code className="text-[#64ffda]">blog/public/posts/*.html</code>
+            </span>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#64ffda]/10 text-[#64ffda] border border-[#64ffda]/20">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#64ffda]"></span>
+              • Production Ready
+            </span>
+            <span className="text-[11px] text-[#8892b0] hidden sm:inline">
+              {projects.length} articles indexed
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          VIEWPORT CONTENT
+          ========================================================================= */}
       {activeProject ? (
-        /* Full-screen Edge-to-Edge container:
-           - Removed all card containers, max-w constraints, sidebar widgets, padding, and borders
-           - 100% viewport width and 100% remaining viewport height (flex-1 / calc(100vh-105px))
-           - overflow-hidden so double scrollbars do NOT appear; scrolling is inside iframe */
-        <main className="w-full flex-1 h-[calc(100vh-105px)] overflow-hidden bg-[#0a192f] relative">
+        /* Blog Post Container: Starts with top space, then smoothly expands edge-to-edge as navbar docks right */
+        <main
+          className={`w-full flex-1 transition-[padding] duration-500 ease-out bg-[#0a192f] h-screen ${
+            isShrunk ? 'pt-0' : 'pt-16'
+          }`}
+        >
           <iframe
+            ref={iframeRef}
             src={activeProject.standaloneUrl}
             title={activeProject.title}
             className="w-full h-full border-0 block"
@@ -293,9 +345,9 @@ export default function App() {
           />
         </main>
       ) : (
-        /* Standard Catalog Feed view */
+        /* Home / Catalog Feed */
         <div className="flex-1 flex flex-col">
-          {/* CLI Run Sandbox Modal / Drawer View */}
+          {/* CLI Run Sandbox Drawer */}
           {activeTab === 'cli' && (
             <div className="bg-[#0b162c] border-b border-[#233554] px-4 md:px-8 py-6 transition-all">
               <div className="max-w-5xl mx-auto">
@@ -314,11 +366,8 @@ export default function App() {
                   </button>
                 </div>
                 <p className="text-sm text-[#8892b0] mb-4">
-                  Every standalone project in this journal is designed to be fully reproducible
-                  locally. Run these commands in your shell to clone, preview, or launch the interactive
-                  environments:
+                  Every standalone project in this journal is designed to be fully reproducible locally.
                 </p>
-
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="bg-[#070d1e] border border-[#233554] rounded-lg p-4">
                     <div className="flex justify-between items-center mb-2">
@@ -379,7 +428,6 @@ export default function App() {
                     <X className="w-5 h-5" />
                   </button>
                 </div>
-
                 <div className="grid md:grid-cols-3 gap-4 text-xs font-mono">
                   <div className="bg-[#070d1e] border border-[#233554] rounded-lg p-4">
                     <h3 className="font-bold text-[#64ffda] mb-2 flex items-center gap-1.5">
@@ -389,7 +437,6 @@ export default function App() {
                       Files stored in <code className="text-slate-300">blog/public/posts/*.html</code> are served intact by Vite at <code className="text-slate-300">/blog/posts/*.html</code>.
                     </p>
                   </div>
-
                   <div className="bg-[#070d1e] border border-[#233554] rounded-lg p-4">
                     <h3 className="font-bold text-[#64ffda] mb-2 flex items-center gap-1.5">
                       <Cpu className="w-4 h-4" /> 2. Zero-Build HTML Parsing
@@ -398,13 +445,12 @@ export default function App() {
                       Vite imports HTML files eagerly with <code className="text-slate-300">?raw</code>. Title and metadata are extracted dynamically to populate catalog cards.
                     </p>
                   </div>
-
                   <div className="bg-[#070d1e] border border-[#233554] rounded-lg p-4">
                     <h3 className="font-bold text-[#64ffda] mb-2 flex items-center gap-1.5">
                       <Monitor className="w-4 h-4" /> 3. Edge-to-Edge Frame
                     </h3>
                     <p className="text-[#8892b0] leading-relaxed">
-                      Clicking an article renders a borderless 100% viewport iframe without container clipping or double scrollbars, maintaining complete original CSS & JS isolation.
+                      Clicking an article renders a borderless 100% viewport iframe without container clipping or double scrollbars.
                     </p>
                   </div>
                 </div>
@@ -427,13 +473,11 @@ export default function App() {
               </h1>
               <p className="text-base md:text-lg text-[#8892b0] max-w-2xl leading-relaxed mb-8">
                 Explore standalone interactive research artifacts, machine learning models, and
-                econometric simulations. Each article operates as an isolated, complete web
-                experience.
+                econometric simulations. Each article operates as an isolated, complete web experience.
               </p>
 
               {/* Search & Category Filter Controls */}
               <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center justify-between">
-                {/* Search Box */}
                 <div className="relative flex-1 max-w-md">
                   <Search className="w-4 h-4 text-[#8892b0] absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
@@ -446,14 +490,13 @@ export default function App() {
                   {searchQuery && (
                     <button
                       onClick={() => setSearchQuery('')}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer"
                     >
                       <X className="w-4 h-4" />
                     </button>
                   )}
                 </div>
 
-                {/* Category Pills */}
                 <div className="flex flex-wrap gap-2">
                   {categories.map((cat) => (
                     <button
@@ -480,9 +523,7 @@ export default function App() {
                 <Terminal className="w-12 h-12 text-[#64ffda] mx-auto mb-4 opacity-50" />
                 <h3 className="text-lg font-bold text-white mb-2">No Articles Found</h3>
                 <p className="text-sm text-[#8892b0] max-w-md mx-auto mb-4">
-                  No standalone posts match your query "{searchQuery}". Place new HTML files in{' '}
-                  <code className="text-[#64ffda] font-mono">blog/public/posts/*.html</code> to
-                  auto-populate them here.
+                  No standalone posts match your query "{searchQuery}".
                 </p>
                 <button
                   onClick={() => {
@@ -501,7 +542,6 @@ export default function App() {
                     key={project.id}
                     className="bg-[#112240] border border-[#233554] hover:border-[#64ffda] rounded-xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex flex-col group"
                   >
-                    {/* Top Card Bar */}
                     <div className="p-5 pb-0 flex items-center justify-between">
                       <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-medium bg-[#64ffda]/10 text-[#64ffda] border border-[#64ffda]/20">
                         {project.category}
@@ -512,7 +552,6 @@ export default function App() {
                       </div>
                     </div>
 
-                    {/* Card Body */}
                     <div className="p-5 flex-1 flex flex-col">
                       <h2
                         onClick={() => handleOpenProject(project)}
@@ -525,7 +564,6 @@ export default function App() {
                         {project.description}
                       </p>
 
-                      {/* Tags */}
                       {project.tags && project.tags.length > 0 && (
                         <div className="flex flex-wrap gap-1.5 mb-5">
                           {project.tags.slice(0, 3).map((tag, idx) => (
@@ -539,7 +577,6 @@ export default function App() {
                         </div>
                       )}
 
-                      {/* Card Footer Actions */}
                       <div className="pt-4 border-t border-[#233554] flex items-center justify-between text-xs font-mono">
                         <button
                           onClick={() => handleOpenProject(project)}
@@ -566,17 +603,14 @@ export default function App() {
             )}
           </main>
 
-          {/* Simple Footer */}
+          {/* Catalog Footer */}
           <footer className="mt-auto border-t border-[#233554] py-8 px-4 text-center text-xs font-mono text-[#8892b0]">
             <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
                 © {new Date().getFullYear()} Sanuz Thapa • Engineering Journal & Standalone Lab
               </div>
               <div className="flex items-center gap-4">
-                <a
-                  href="../"
-                  className="hover:text-[#64ffda] transition-colors"
-                >
+                <a href="../" className="hover:text-[#64ffda] transition-colors">
                   Portfolio Home
                 </a>
                 <span>•</span>
