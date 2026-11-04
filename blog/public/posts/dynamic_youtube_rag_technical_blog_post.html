@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dynamic YouTube RAG & Video Explorer: Zero-Latency Video Semantic Search</title>
+  <meta name="category" content="AI & LLMs">
+  <meta name="date" content="November 2026">
+  <meta name="description" content="A technical deep-dive into building an on-the-fly multimodal YouTube RAG pipeline with timestamp-preserving chunking, BGE-M3 multilingual embeddings, and sub-second transcript retrieval.">
+  <meta name="tags" content="RAG, YouTube, BGE-M3, Faster-Whisper, FastAPI, Multilingual, Groq, Gemini">
+  <meta name="status" content="Production Ready">
+
+  <style>
+    /* CSS Reset & Variables */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-main: #020617;        /* slate-950 */
+      --bg-surface: #0f172a;     /* slate-900 */
+      --bg-card-hover: #17223b;
+      --border-color: #1e293b;   /* slate-800 */
+      --border-subtle: #334155;  /* slate-700 */
+      --emerald: #10b981;
+      --emerald-light: #34d399;
+      --emerald-dark: #065f46;
+      --cyan: #06b6d4;
+      --cyan-light: #67e8f9;
+      --text-main: #f8fafc;      /* slate-50 */
+      --text-muted: #94a3b8;     /* slate-400 */
+      --text-sub: #cbd5e1;       /* slate-300 */
+      --code-bg: #00020a;
+      --badge-bg: rgba(16, 185, 129, 0.1);
+      --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-sub);
+      font-family: var(--font-sans);
+      line-height: 1.7;
+      font-size: 1.05rem;
+      padding: 2.5rem 1.25rem;
+      display: flex;
+      justify-content: center;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 920px;
+    }
+
+    /* Typography & Hierarchy */
+    h1, h2, h3, h4 {
+      color: var(--text-main);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      line-height: 1.25;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #ffffff 40%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    @media (max-width: 640px) {
+      h1 { font-size: 1.95rem; }
+      body { padding: 1.5rem 0.85rem; }
+    }
+
+    h2 {
+      font-size: 1.65rem;
+      margin-top: 3.5rem;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    h3 {
+      font-size: 1.25rem;
+      margin-top: 2rem;
+      margin-bottom: 0.85rem;
+      color: var(--emerald-light);
+    }
+
+    p {
+      margin-bottom: 1.25rem;
+      color: var(--text-sub);
+    }
+
+    strong {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    a {
+      color: var(--cyan);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    a:hover {
+      color: var(--cyan-light);
+      text-decoration: underline;
+    }
+
+    /* Meta Badges */
+    .meta-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.35rem 0.75rem;
+      border-radius: 9999px;
+      border: 1px solid transparent;
+    }
+
+    .badge-primary {
+      background: rgba(16, 185, 129, 0.12);
+      color: var(--emerald-light);
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-status {
+      background: rgba(6, 182, 212, 0.12);
+      color: var(--cyan-light);
+      border-color: rgba(6, 182, 212, 0.3);
+    }
+
+    .badge-info {
+      background: #1e293b;
+      color: var(--text-muted);
+    }
+
+    .subtitle {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+      font-weight: 400;
+    }
+
+    /* 3-Card Metrics Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+      margin: 2.25rem 0;
+    }
+
+    .metric-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .metric-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--border-subtle);
+    }
+
+    .metric-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--emerald), var(--cyan));
+    }
+
+    .metric-title {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+    }
+
+    .metric-value {
+      font-size: 2.1rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.03em;
+      display: flex;
+      align-items: baseline;
+      gap: 0.3rem;
+    }
+
+    .metric-value .accent {
+      color: var(--emerald-light);
+    }
+
+    .metric-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    /* Comparison Box */
+    .compare-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 1.75rem 0;
+    }
+
+    @media (max-width: 680px) {
+      .compare-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .compare-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 1.25rem;
+    }
+
+    .compare-card.flawed {
+      border-left: 3px solid #f43f5e;
+    }
+
+    .compare-card.optimal {
+      border-left: 3px solid var(--emerald);
+    }
+
+    .compare-card h4 {
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.05rem;
+    }
+
+    /* Architecture Visual Diagram */
+    .diagram-wrapper {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.75rem 1.25rem;
+      margin: 2rem 0;
+      overflow-x: auto;
+    }
+
+    .diagram-title {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    /* Monospace Code & Snippets */
+    pre {
+      background-color: var(--code-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 1.25rem;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      line-height: 1.6;
+      margin: 1.5rem 0;
+      position: relative;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.9em;
+      color: var(--emerald-light);
+      background: rgba(16, 185, 129, 0.1);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+    }
+
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: #e2e8f0;
+    }
+
+    .code-comment { color: #64748b; font-style: italic; }
+    .code-keyword { color: #f43f5e; font-weight: 600; }
+    .code-func { color: var(--cyan-light); }
+    .code-str { color: #38bdf8; }
+    .code-num { color: #f59e0b; }
+
+    /* Interactive Simulator */
+    .simulator-container {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1.75rem;
+      margin: 2.5rem 0;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .sim-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .video-mock-card {
+      background: #020617;
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .video-screen {
+      height: 180px;
+      background: #090d16;
+      border-radius: 8px;
+      border: 1px dashed var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 0.85rem;
+    }
+
+    .video-status-overlay {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.7);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      color: var(--cyan);
+    }
+
+    .timeline-bar-bg {
+      width: 100%;
+      height: 8px;
+      background: #1e293b;
+      border-radius: 4px;
+      cursor: pointer;
+      position: relative;
+      margin-top: 0.5rem;
+    }
+
+    .timeline-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--emerald), var(--cyan));
+      border-radius: 4px;
+      width: 0%;
+      transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .timeline-marker {
+      position: absolute;
+      top: -4px;
+      width: 16px;
+      height: 16px;
+      background: #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 0 8px rgba(255,255,255,0.8);
+      transform: translateX(-50%);
+      transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .chips-wrapper {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+
+    .chip-btn {
+      background: #1e293b;
+      color: var(--text-sub);
+      border: 1px solid var(--border-subtle);
+      border-radius: 9999px;
+      padding: 0.4rem 0.85rem;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .chip-btn:hover {
+      background: var(--emerald-dark);
+      color: #ffffff;
+      border-color: var(--emerald);
+    }
+
+    .sim-search-bar {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .sim-input {
+      flex: 1;
+      background: #020617;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 0.95rem;
+    }
+
+    .sim-input:focus {
+      outline: none;
+      border-color: var(--cyan);
+    }
+
+    .sim-btn {
+      background: var(--emerald);
+      color: #020617;
+      border: none;
+      border-radius: 8px;
+      padding: 0 1.25rem;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .sim-btn:hover {
+      background: var(--emerald-light);
+    }
+
+    .results-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .result-chunk {
+      background: #020617;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .result-chunk.active-seek {
+      border-color: var(--emerald);
+      background: #081a17;
+    }
+
+    .result-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+    }
+
+    .sim-tag {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--emerald-light);
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-weight: 600;
+      font-family: var(--font-mono);
+    }
+
+    .jump-btn {
+      background: rgba(6, 182, 212, 0.15);
+      color: var(--cyan-light);
+      border: 1px solid rgba(6, 182, 212, 0.4);
+      padding: 0.25rem 0.65rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      transition: all 0.2s;
+    }
+
+    .jump-btn:hover {
+      background: var(--cyan);
+      color: #020617;
+    }
+
+    /* Callout & Tables */
+    .callout {
+      border-left: 4px solid var(--cyan);
+      background: rgba(6, 182, 212, 0.06);
+      padding: 1.25rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1.75rem 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+
+    th, td {
+      padding: 0.85rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th {
+      background: var(--bg-surface);
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .footer-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .author-box {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .author-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--emerald), var(--cyan));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: #020617;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header Section -->
+  <header>
+    <div class="meta-bar">
+      <span class="badge badge-primary">AI &amp; LLMs</span>
+      <span class="badge badge-status">Production Ready</span>
+      <span class="badge badge-info">November 2026</span>
+      <span class="badge badge-info">8 min read</span>
+    </div>
+
+    <h1>Dynamic YouTube RAG &amp; Video Explorer: Zero-Latency Video Semantic Search</h1>
+    <p class="subtitle">
+      How we engineered an on-the-fly ingestion pipeline using time-window chunking, sub-second transcript scraping, and multilingual BGE-M3 embeddings to jump directly to exact video moments.
+    </p>
+  </header>
+
+  <!-- 3-Card Metrics Grid -->
+  <section class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-title">Transcript Ingestion</div>
+      <div class="metric-value">&lt; 2.0<span class="accent">s</span></div>
+      <div class="metric-desc">Sub-second caption scrape bypassing heavy 100MB+ audio downloads, with automated Batched Whisper fallback.</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-title">Temporal Precision</div>
+      <div class="metric-value">Exact <span class="accent">&amp;t=s</span></div>
+      <div class="metric-desc">Non-destructive time-window chunking preserves frame-level timestamp intervals through the entire vector index.</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-title">Multilingual Vector Space</div>
+      <div class="metric-value">1024<span class="accent">-dim</span></div>
+      <div class="metric-desc">Powered by BAAI/bge-m3 across dense + lexical spaces, seamlessly handling code-mixed queries (English, Nepali, Hinglish).</div>
+    </div>
+  </section>
+
+  <!-- Section: The Core Dilemma -->
+  <section>
+    <h2>The Core Dilemma: Static vs Dynamic Video RAG</h2>
+    <p>
+      Retrieval-Augmented Generation has revolutionized interactions with PDFs, wikis, and markdown libraries. However, adapting this architecture to video content has traditionally suffered from a fatal architectural flaw: <strong>treating temporal streams as static flat documents</strong>.
+    </p>
+
+    <div class="compare-container">
+      <div class="compare-card flawed">
+        <h4>❌ The Traditional Video RAG Flaw</h4>
+        <p style="font-size: 0.9rem;">
+          Downloads full video or audio streams (often 50–200 MB), transcribes via Whisper end-to-end (taking 2–5 minutes), breaks text into token-based windows, and strips timestamps.
+        </p>
+        <p style="font-size: 0.9rem; color: #f87171;">
+          <strong>Result:</strong> Returns a static wall of transcript. The user is still forced to guess <em>where</em> in a 90-minute video the topic actually took place.
+        </p>
+      </div>
+
+      <div class="compare-card optimal">
+        <h4>✅ Dynamic YouTube RAG Paradigm</h4>
+        <p style="font-size: 0.9rem;">
+          Inspects YouTube’s native caption tracks in ~1.5s via raw <code>json3</code> / VTT structures. Preserves continuous start/end boundaries on every segment chunk.
+        </p>
+        <p style="font-size: 0.9rem; color: var(--emerald-light);">
+          <strong>Result:</strong> Instant query resolution linked directly to clickable player seeking points (e.g., <code>&amp;t=724s</code>) with zero hallucination.
+        </p>
+      </div>
+    </div>
+
+    <p>
+      Consider an algorithmic query: <em>"Where is memoization vs tabulation explained?"</em>. In traditional document RAG, the LLM outputs a three-paragraph explanation of memoization. In <strong>Dynamic YouTube RAG</strong>, the system responds with exact temporal navigation chips:
+    </p>
+    <pre><code>Question: "Where is memoization vs tabulation explained?"
+
+→ Found: DP Lecture 3 — Memoization Deep Dive @ 12:04  [▶ Seek to 12:04]
+→ Found: DP Lecture 5 — Tabulation Recipe      @ 04:31  [▶ Seek to 04:31]</code></pre>
+  </section>
+
+  <!-- Section: Architectural Breakdown -->
+  <section>
+    <h2>System Architecture: The End-to-End Ingestion Engine</h2>
+    <p>
+      The core pipeline is decoupled into a dual-path transcription layer, a time-window sliding chunker, a dense vector embedder with an in-memory/disk compressed index (<code>vectors.npz</code> or Qdrant), and a dual LLM inference router (Groq &amp; Gemini).
+    </p>
+
+    <div class="diagram-wrapper">
+      <div class="diagram-title">Figure 1: Sub-Second Dynamic Ingestion &amp; Time-Preserving Vector Pipeline</div>
+      <svg viewBox="0 0 850 250" style="width: 100%; height: auto; display: block;" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="gradEmerald" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#10b981" />
+            <stop offset="100%" stop-color="#059669" />
+          </linearGradient>
+          <linearGradient id="gradCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#06b6d4" />
+            <stop offset="100%" stop-color="#0284c7" />
+          </linearGradient>
+          <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 8 5 L 0 9 z" fill="#64748b" />
+          </marker>
+        </defs>
+
+        <!-- Node: Link Input -->
+        <rect x="15" y="95" width="125" height="55" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1.5" />
+        <text x="77" y="120" fill="#f8fafc" font-size="12" font-weight="700" text-anchor="middle">YouTube Link</text>
+        <text x="77" y="136" fill="#94a3b8" font-size="10" text-anchor="middle">Single / Playlist</text>
+
+        <!-- Path 1 to Condition -->
+        <path d="M 140 122 L 180 122" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)" />
+
+        <!-- Node: Subtitle Decision -->
+        <polygon points="235,95 285,122 235,149 185,122" fill="#0f172a" stroke="#06b6d4" stroke-width="1.5" />
+        <text x="235" y="122" fill="#67e8f9" font-size="11" font-weight="600" text-anchor="middle">Captions?</text>
+
+        <!-- Fast Path: Yes -->
+        <path d="M 235 95 L 235 50 L 320 50" stroke="#10b981" stroke-width="2" marker-end="url(#arrow)" />
+        <text x="260" y="42" fill="#34d399" font-size="10" font-weight="bold">Yes (&lt; 1.5s)</text>
+
+        <rect x="325" y="25" width="135" height="50" rx="8" fill="#0f172a" stroke="#10b981" stroke-width="1.5" />
+        <text x="392" y="46" fill="#f8fafc" font-size="11" font-weight="600" text-anchor="middle">Native Subtitles</text>
+        <text x="392" y="62" fill="#34d399" font-size="9" text-anchor="middle">json3 / VTT parser</text>
+
+        <!-- Slow Fallback: No -->
+        <path d="M 235 149 L 235 195 L 320 195" stroke="#f43f5e" stroke-width="2" marker-end="url(#arrow)" />
+        <text x="265" y="190" fill="#f43f5e" font-size="10" font-weight="bold">No</text>
+
+        <rect x="325" y="170" width="135" height="50" rx="8" fill="#0f172a" stroke="#f43f5e" stroke-width="1.5" />
+        <text x="392" y="191" fill="#f8fafc" font-size="11" font-weight="600" text-anchor="middle">Faster-Whisper</text>
+        <text x="392" y="207" fill="#fda4af" font-size="9" text-anchor="middle">CTranslate2 Large-V3</text>
+
+        <!-- Converge to Chunking -->
+        <path d="M 460 50 L 495 50 L 495 105" stroke="#64748b" stroke-width="2" />
+        <path d="M 460 195 L 495 195 L 495 139" stroke="#64748b" stroke-width="2" />
+        <path d="M 495 122 L 525 122" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)" />
+
+        <!-- Node: Time-Window Chunker -->
+        <rect x="530" y="95" width="135" height="55" rx="8" fill="#1e293b" stroke="#34d399" stroke-width="1.5" />
+        <text x="597" y="118" fill="#ffffff" font-size="11" font-weight="600" text-anchor="middle">Time-Window</text>
+        <text x="597" y="135" fill="#34d399" font-size="10" text-anchor="middle">Chunking (&amp;t=start)</text>
+
+        <!-- Chunking to Embeddings -->
+        <path d="M 665 122 L 705 122" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)" />
+
+        <!-- Node: BGE-M3 & Vector Store -->
+        <rect x="710" y="85" width="125" height="75" rx="8" fill="url(#gradCyan)" />
+        <text x="772" y="112" fill="#020617" font-size="12" font-weight="800" text-anchor="middle">BAAI / BGE-M3</text>
+        <text x="772" y="128" fill="#020617" font-size="10" font-weight="600" text-anchor="middle">1024-dim Vector</text>
+        <text x="772" y="144" fill="#020617" font-size="9" font-weight="bold" text-anchor="middle">vectors.npz / Qdrant</text>
+      </svg>
+    </div>
+  </section>
+
+  <!-- Section: Deep Technical Implementation -->
+  <section>
+    <h2>Deep Technical Implementation</h2>
+
+    <h3>1. Sub-Second Native Transcription vs Batched Whisper Fallback</h3>
+    <p>
+      Downloading an audio stream using <code>yt-dlp</code> and transcoding it through FFmpeg introduces an unrecoverable 8–20 second overhead on standard cloud instances. 
+      Dynamic YouTube RAG circumvents this entirely by prioritizing the extraction of automated or manual YouTube subtitle payloads. Using <code>json3</code> extraction, raw timestamp sequences are retrieved in under 1.8 seconds.
+    </p>
+
+    <pre><code><span class="code-comment"># ytrag/transcribe.py — Fast JSON3 caption extraction</span>
+<span class="code-keyword">import</span> json
+<span class="code-keyword">import</span> yt_dlp
+<span class="code-keyword">from</span> typing <span class="code-keyword">import</span> List, Dict
+
+<span class="code-keyword">def</span> <span class="code-func">fetch_subtitles_fast</span>(video_url: str) -&gt; List[Dict]:
+    ydl_opts = {
+        <span class="code-str">"skip_download"</span>: <span class="code-keyword">True</span>,
+        <span class="code-str">"writesubtitles"</span>: <span class="code-keyword">True</span>,
+        <span class="code-str">"writeautomaticsub"</span>: <span class="code-keyword">True</span>,
+        <span class="code-str">"subtitlesformat"</span>: <span class="code-str">"json3"</span>,
+        <span class="code-str">"quiet"</span>: <span class="code-keyword">True</span>
+    }
+    <span class="code-keyword">with</span> yt_dlp.YoutubeDL(ydl_opts) <span class="code-keyword">as</span> ydl:
+        info = ydl.extract_info(video_url, download=<span class="code-keyword">False</span>)
+        subtitles = info.get(<span class="code-str">"subtitles"</span>) <span class="code-keyword">or</span> info.get(<span class="code-str">"automatic_captions"</span>)
+        <span class="code-keyword">if</span> subtitles:
+            <span class="code-comment"># Parse events to extract word chunks and microsecond timestamps</span>
+            <span class="code-keyword">return</span> parse_json3_events(subtitles)
+            
+    <span class="code-comment"># Fallback: Trigger Faster-Whisper on extracted 16kHz audio stream</span>
+    <span class="code-keyword">return</span> fallback_faster_whisper(video_url)</code></pre>
+
+    <h3>2. Timestamp-Preserving Time-Window Chunking</h3>
+    <p>
+      Token-based splitters (like recursive character text splitters) drop time metadata or produce arbitrary cuts right in the middle of a spoken sentence. Our engine implements a <strong>Temporal Window Sliding Chunker</strong>. 
+      It enforces a target window (e.g., 60 seconds) with an overlap buffer (e.g., 15 seconds), while rigidly tracking both continuous boundaries:
+    </p>
+
+    <pre><code><span class="code-comment"># Chunk Data Model Schema</span>
+{
+  <span class="code-str">"chunk_id"</span>: <span class="code-str">"chunk_0042"</span>,
+  <span class="code-str">"video_id"</span>: <span class="code-str">"7x0bB2N8Y1w"</span>,
+  <span class="code-str">"start_time"</span>: <span class="code-num">724</span>,
+  <span class="code-str">"end_time"</span>: <span class="code-num">784</span>,
+  <span class="code-str">"timestamp"</span>: <span class="code-str">"12:04"</span>,
+  <span class="code-str">"video_url"</span>: <span class="code-str">"https://youtu.be/7x0bB2N8Y1w?t=724s"</span>,
+  <span class="code-str">"text"</span>: <span class="code-str">"Memoization stores the result of costly function calls so we do not recompute overlapping nodes in the recursion tree..."</span>
+}</code></pre>
+
+    <h3>3. Multilingual Dense Embeddings: BAAI/bge-m3</h3>
+    <p>
+      Real-world educational videos often mix languages (e.g., instructors interweaving English terms with Hindi, Nepali, or regional vernacular). Standard English-only encoders (like standard MiniLM) fail on code-switched queries. 
+      We integrated <code>BAAI/bge-m3</code>, a 1024-dimensional model designed specifically for multilingual semantic density and long-context alignment.
+    </p>
+  </section>
+
+  <!-- Section: Interactive Simulator & Demo -->
+  <section>
+    <h2>Interactive Simulator: Dynamic Retrieval &amp; Player Seeking</h2>
+    <p>
+      Test the timestamp-seeking mechanism below. Click any pre-generated question chip or type a custom inquiry to run a vector similarity match over our indexed lecture: <em>"Dynamic Programming &amp; State Optimizations"</em>.
+    </p>
+
+    <div class="simulator-container">
+      <div class="sim-header">
+        <div>
+          <h3 style="margin: 0; color: #ffffff;">Video Explorer &amp; Timeline Seeker</h3>
+          <span style="font-size: 0.85rem; color: var(--text-muted);">Indexed Video: "CS201: Dynamic Programming Masterclass (1h 15m)"</span>
+        </div>
+        <span class="sim-tag">ACTIVE INDEX: 78 CHUNKS</span>
+      </div>
+
+      <!-- Mock Video Player Frame -->
+      <div class="video-mock-card">
+        <div class="video-screen" id="mockScreen">
+          <div class="video-status-overlay" id="playerOverlay">STATUS: PAUSED AT 00:00</div>
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--emerald-light); opacity: 0.8;">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polygon points="10 8 16 12 10 16 10 8" fill="var(--emerald-light)"></polygon>
+          </svg>
+          <div id="videoDisplayContent" style="margin-top: 10px; font-size: 0.95rem; font-weight: 600; color: #f8fafc; text-align: center; max-width: 80%;">
+            Lecture Initialized. Submit a query below to seek.
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-family: var(--font-mono); color: var(--text-muted);">
+          <span id="currentTimeLabel">00:00</span>
+          <span id="totalTimeLabel">75:00</span>
+        </div>
+
+        <div class="timeline-bar-bg" id="timelineBar" onclick="handleTimelineManualClick(event)">
+          <div class="timeline-bar-fill" id="timelineFill"></div>
+          <div class="timeline-marker" id="timelineMarker" style="left: 0%;"></div>
+        </div>
+      </div>
+
+      <!-- Question Chips -->
+      <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem;">AI-Suggested Exploration Prompts:</div>
+      <div class="chips-wrapper">
+        <button class="chip-btn" onclick="runSimQuery('Where is memoization vs tabulation explained?')">Memoization vs Tabulation</button>
+        <button class="chip-btn" onclick="runSimQuery('What is optimal substructure?')">Optimal Substructure</button>
+        <button class="chip-btn" onclick="runSimQuery('How to construct the recursion tree?')">Recursion Tree Setup</button>
+        <button class="chip-btn" onclick="runSimQuery('Sliding window state compression')">State Compression</button>
+      </div>
+
+      <!-- Query Bar -->
+      <div class="sim-search-bar">
+        <input type="text" id="simQueryInput" class="sim-input" placeholder="Ask a question about this video (e.g. tabulation recipe)..." onkeydown="if(event.key === 'Enter') runCustomSimQuery()">
+        <button class="sim-btn" onclick="runCustomSimQuery()">Retrieve</button>
+      </div>
+
+      <!-- Results Container -->
+      <div style="font-size: 0.85rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-top: 1rem;">
+        Semantic Matches (<span id="matchCount">0</span> Chunks Retrieved)
+      </div>
+      <div class="results-grid" id="resultsContainer">
+        <!-- Injected via JavaScript -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Section: API & Production Deployment -->
+  <section>
+    <h2>REST API &amp; Terminal Workflows</h2>
+    <p>
+      The service is built on <code>FastAPI</code> for async high-throughput ingestion, paired with a rich terminal interface driven by <code>Typer</code> and <code>Rich</code>.
+    </p>
+
+    <h3>Query Endpoint</h3>
+    <pre><code><span class="code-comment"># Request</span>
+POST /query
+Content-Type: application/json
+
+{
+  <span class="code-str">"url"</span>: <span class="code-str">"https://www.youtube.com/watch?v=7x0bB2N8Y1w"</span>,
+  <span class="code-str">"query"</span>: <span class="code-str">"when should we use dynamic programming?"</span>,
+  <span class="code-str">"top_k"</span>: <span class="code-num">3</span>
+}
+
+<span class="code-comment"># Response</span>
+{
+  <span class="code-str">"status"</span>: <span class="code-str">"success"</span>,
+  <span class="code-str">"count"</span>: <span class="code-num">3</span>,
+  <span class="code-str">"results"</span>: [
+    {
+      <span class="code-str">"timestamp"</span>: <span class="code-str">"04:12"</span>,
+      <span class="code-str">"start_time"</span>: <span class="code-num">252</span>,
+      <span class="code-str">"video_url"</span>: <span class="code-str">"https://youtu.be/7x0bB2N8Y1w?t=252s"</span>,
+      <span class="code-str">"similarity"</span>: <span class="code-num">0.894</span>,
+      <span class="code-str">"preview"</span>: <span class="code-str">"We use dynamic programming when overlapping subproblems and optimal substructure exist..."</span>
+    }
+  ]
+}</code></pre>
+
+    <h3>CLI Quick Commands</h3>
+    <pre><code><span class="code-comment"># Batch ingest an entire channel playlist</span>
+uv run ytrag ingest --playlist <span class="code-str">"https://www.youtube.com/playlist?list=PL_xxx"</span>
+
+<span class="code-comment"># Perform terminal search with rich tabular timestamps</span>
+uv run ytrag search <span class="code-str">"optimal binary search tree derivation"</span>
+
+<span class="code-comment"># Grounded LLM answer via Groq / Gemini</span>
+uv run ytrag ask <span class="code-str">"summarize bottom-up tabulation steps"</span></code></pre>
+  </section>
+
+  <!-- Section: Repository Structure -->
+  <section>
+    <h2>Repository Architecture</h2>
+    <div class="callout">
+      <strong>Clean Modular Structure:</strong> Built with high separation of concerns between extraction, vector space mapping, and generative synthesis.
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Module</th>
+          <th>Responsibility</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>ytrag/transcribe.py</code></td>
+          <td>Sub-second native subtitle extraction with Faster-Whisper Large-V3 fallback.</td>
+        </tr>
+        <tr>
+          <td><code>ytrag/chunk.py</code></td>
+          <td>Sliding time-window chunking logic preserving second-level frame bounds.</td>
+        </tr>
+        <tr>
+          <td><code>ytrag/embed.py</code></td>
+          <td>1024-dim BAAI/bge-m3 dense vector indexing and cosine metric operations.</td>
+        </tr>
+        <tr>
+          <td><code>ytrag/answer.py</code></td>
+          <td>Grounded LLM synthesis (Groq Llama-3.3-70b / Google Gemini 1.5/2.0).</td>
+        </tr>
+        <tr>
+          <td><code>api/main.py</code></td>
+          <td>FastAPI asynchronous web service providing <code>/ingest</code>, <code>/query</code>, and health check routes.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-top">
+      <div class="author-box">
+        <div class="author-avatar">ST</div>
+        <div>
+          <div style="font-weight: 600; color: #ffffff;">Sanuj Thapa</div>
+          <div style="font-size: 0.8rem;">Lead AI Systems Engineer &amp; Open Source Contributor</div>
+        </div>
+      </div>
+      <div>
+        <a href="https://github.com/sanuzthapa/Youtube-Context-finder-RAG" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 600;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+          </svg>
+          View Source Repository
+        </a>
+      </div>
+    </div>
+    <div style="font-size: 0.8rem; color: #64748b; margin-top: 0.5rem;">
+      Released under the MIT Open Source License. Built for zero-latency educational video intelligence.
+    </div>
+  </footer>
+
+</div>
+
+<!-- Interactive Simulator Logic -->
+<script>
+  // Mock In-Memory Dataset representing pre-chunked video segments
+  const MOCK_DB = [
+    {
+      id: "chunk_01",
+      start_time: 252,
+      end_time: 312,
+      timestamp: "04:12",
+      title: "Core Criteria: Overlapping Subproblems",
+      keywords: ["when", "use", "dynamic programming", "subproblems", "criteria", "properties"],
+      preview: "We apply dynamic programming whenever we observe two key properties: overlapping subproblems and optimal substructure. If subproblems do not repeat, divide and conquer is sufficient."
+    },
+    {
+      id: "chunk_02",
+      start_time: 724,
+      end_time: 790,
+      timestamp: "12:04",
+      title: "Deep Dive: Memoization vs Tabulation",
+      keywords: ["memoization", "tabulation", "explained", "difference", "top down", "bottom up"],
+      preview: "Memoization is top-down: it caches the result of expensive calls inside a hash table or array during recursion. Tabulation is bottom-up: it builds solutions iteratively starting from base cases."
+    },
+    {
+      id: "chunk_03",
+      start_time: 1145,
+      end_time: 1220,
+      timestamp: "19:05",
+      title: "Optimal Substructure Mathematical Proof",
+      keywords: ["optimal", "substructure", "proof", "shortest path", "greedy"],
+      preview: "An optimal substructure means the globally optimal solution can be constructed from optimal solutions to its constituent subproblems. We demonstrate this via the Bellman-Ford recurrence."
+    },
+    {
+      id: "chunk_04",
+      start_time: 1680,
+      end_time: 1745,
+      timestamp: "28:00",
+      title: "Recursion Trees & State Space Growth",
+      keywords: ["recursion", "tree", "setup", "branching", "base cases"],
+      preview: "By sketching the recursion tree for Fibonacci, we visualize redundant branch calculations. Without caching, time complexity blows up to O(2^n). With memoization, it drops to O(n)."
+    },
+    {
+      id: "chunk_05",
+      start_time: 2450,
+      end_time: 2515,
+      timestamp: "40:50",
+      title: "Memory State Compression Tricks",
+      keywords: ["sliding", "window", "state", "compression", "space", "optimization"],
+      preview: "Notice that to compute dp[i], we only ever look at dp[i-1] and dp[i-2]. Therefore, we can discard the O(n) array and maintain two scalar variables, achieving O(1) auxiliary space."
+    }
+  ];
+
+  const TOTAL_VIDEO_SECONDS = 4500; // 75 minutes
+
+  // Format seconds to MM:SS
+  function formatTime(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  // Seek video simulator to given second
+  function seekTo(second, chunkId) {
+    const fill = document.getElementById('timelineFill');
+    const marker = document.getElementById('timelineMarker');
+    const timeLabel = document.getElementById('currentTimeLabel');
+    const overlay = document.getElementById('playerOverlay');
+    const display = document.getElementById('videoDisplayContent');
+
+    const pct = Math.min(100, Math.max(0, (second / TOTAL_VIDEO_SECONDS) * 100));
+    fill.style.width = pct + '%';
+    marker.style.left = pct + '%';
+    
+    timeLabel.innerText = formatTime(second);
+    overlay.innerText = `PLAYING AT ${formatTime(second)} (&t=${second}s)`;
+    
+    // Highlight active chunk
+    document.querySelectorAll('.result-chunk').forEach(el => el.classList.remove('active-seek'));
+    if (chunkId) {
+      const activeEl = document.getElementById(chunkId);
+      if (activeEl) activeEl.classList.add('active-seek');
+    }
+
+    const chunk = MOCK_DB.find(c => c.start_time === second);
+    if (chunk) {
+      display.innerHTML = `<strong>${chunk.title}</strong><br><span style="font-size:0.8rem; color:#94a3b8;">${chunk.preview}</span>`;
+    }
+  }
+
+  // Manual scrubbing on progress bar
+  function handleTimelineManualClick(event) {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+    const pct = clickX / rect.width;
+    const targetSecond = Math.floor(pct * TOTAL_VIDEO_SECONDS);
+    seekTo(targetSecond, null);
+  }
+
+  // Live Query Evaluation
+  function evaluateQuery(queryText) {
+    const qLower = queryText.toLowerCase();
+    const terms = qLower.split(/\s+/).filter(t => t.length > 2);
+
+    return MOCK_DB.map(chunk => {
+      let score = 0.55; // baseline semantic baseline
+      terms.forEach(term => {
+        if (chunk.keywords.some(k => k.includes(term) || term.includes(k))) {
+          score += 0.12;
+        }
+        if (chunk.title.toLowerCase().includes(term)) {
+          score += 0.15;
+        }
+        if (chunk.preview.toLowerCase().includes(term)) {
+          score += 0.08;
+        }
+      });
+      // Normalize max score
+      score = Math.min(0.965, score + (Math.random() * 0.02));
+      return { ...chunk, score: parseFloat(score.toFixed(3)) };
+    })
+    .sort((a, b) => b.score - a.score);
+  }
+
+  function runSimQuery(queryStr) {
+    document.getElementById('simQueryInput').value = queryStr;
+    executeSimulation(queryStr);
+  }
+
+  function runCustomSimQuery() {
+    const q = document.getElementById('simQueryInput').value.trim();
+    if (!q) return;
+    executeSimulation(q);
+  }
+
+  function executeSimulation(queryStr) {
+    const results = evaluateQuery(queryStr);
+    const container = document.getElementById('resultsContainer');
+    const matchCount = document.getElementById('matchCount');
+    container.innerHTML = '';
+    matchCount.innerText = results.length;
+
+    results.forEach((res, index) => {
+      const card = document.createElement('div');
+      card.className = 'result-chunk';
+      card.id = `result_${res.id}`;
+
+      card.innerHTML = `
+        <div class="result-meta">
+          <span style="font-weight: 700; color: #ffffff;">${index + 1}. ${res.title}</span>
+          <span class="sim-tag">Cosine: ${(res.score * 100).toFixed(1)}%</span>
+        </div>
+        <p style="font-size: 0.88rem; color: #cbd5e1; margin-bottom: 0.4rem;">
+          "${res.preview}"
+        </p>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 0.8rem; font-family: var(--font-mono); color: var(--emerald-light);">Anchor: ${res.timestamp} (&amp;t=${res.start_time}s)</span>
+          <button class="jump-btn" onclick="seekTo(${res.start_time}, 'result_${res.id}')">
+            <span>▶ Jump to ${res.timestamp}</span>
+          </button>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+
+    // Automatically seek to top result
+    if (results.length > 0) {
+      seekTo(results[0].start_time, `result_${results[0].id}`);
+    }
+  }
+
+  // Pre-load default state on page mount
+  window.addEventListener('DOMContentLoaded', () => {
+    runSimQuery("Where is memoization vs tabulation explained?");
+  });
+</script>
+
+</body>
+</html>
