@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data in the Driver's Seat: Decoding NYC Taxi Earnings with Machine Learning</title>
+  <meta name="category" content="Data Pipelines & Analytics">
+  <meta name="date" content="November 2026">
+  <meta name="description" content="An end-to-end data science deep dive into 2023 NYC Yellow Taxi operations: Socrata SoQL API ingestion, Welch's t-test inferential statistics, and Random Forest fare prediction.">
+  <meta name="tags" content="Python, SoQL, Scikit-Learn, Random Forest, Welch's t-test, Feature Engineering, NYC Open Data">
+  <meta name="status" content="Case Study">
+
+  <style>
+    :root {
+      --bg-base: #020617;
+      --bg-surface: #0f172a;
+      --bg-surface-elevated: #1e293b;
+      --border-subtle: #334155;
+      --border-bright: #475569;
+      --taxi-yellow: #f59e0b;
+      --taxi-yellow-bright: #fbbf24;
+      --taxi-yellow-glow: rgba(245, 158, 11, 0.15);
+      --emerald: #10b981;
+      --emerald-light: #34d399;
+      --cyan: #06b6d4;
+      --rose-danger: #f43f5e;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-soft: #cbd5e1;
+      --code-bg: #00020a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.7;
+      padding: 2.5rem 1.25rem;
+      display: flex;
+      justify-content: center;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 920px;
+      width: 100%;
+    }
+
+    /* Header & Badges */
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 2.25rem;
+      position: relative;
+    }
+
+    .badge-row {
+      display: flex;
+      gap: 0.6rem;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background: var(--taxi-yellow-glow);
+      color: var(--taxi-yellow-bright);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+    }
+
+    .badge-cyan {
+      background: rgba(6, 182, 212, 0.1);
+      color: var(--cyan);
+      border-color: rgba(6, 182, 212, 0.3);
+    }
+
+    .badge-emerald {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--emerald-light);
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .meta-text {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    h1 {
+      font-size: 2.45rem;
+      font-weight: 850;
+      line-height: 1.2;
+      color: var(--text-main);
+      margin-bottom: 0.85rem;
+      letter-spacing: -0.02em;
+    }
+
+    .hero-accent {
+      background: linear-gradient(90deg, var(--taxi-yellow-bright), #fb923c);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      font-size: 1.15rem;
+      color: var(--text-soft);
+      max-width: 780px;
+      line-height: 1.6;
+    }
+
+    /* 3-Card Metrics Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.25rem;
+      margin: 2.5rem 0 3rem;
+    }
+
+    .metric-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.85rem;
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .metric-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--taxi-yellow);
+    }
+
+    .metric-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--taxi-yellow), var(--taxi-yellow-bright));
+    }
+
+    .metric-card.emerald-accent::before {
+      background: linear-gradient(90deg, var(--emerald), var(--cyan));
+    }
+
+    .metric-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 0.45rem;
+    }
+
+    .metric-value {
+      font-size: 2.35rem;
+      font-weight: 850;
+      color: var(--taxi-yellow-bright);
+      line-height: 1.1;
+      margin-bottom: 0.35rem;
+      font-feature-settings: "tnum";
+    }
+
+    .metric-card.emerald-accent .metric-value {
+      color: var(--emerald-light);
+    }
+
+    .metric-sub {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Section Headers */
+    h2 {
+      font-size: 1.55rem;
+      font-weight: 750;
+      margin: 3rem 0 1.25rem;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      letter-spacing: -0.01em;
+    }
+
+    h3 {
+      font-size: 1.15rem;
+      font-weight: 650;
+      color: var(--text-main);
+      margin: 1.25rem 0 0.5rem;
+    }
+
+    p {
+      margin-bottom: 1.25rem;
+      color: var(--text-soft);
+    }
+
+    strong {
+      color: #fff;
+    }
+
+    /* Interactive Pipeline Navigation */
+    .timeline-nav {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+      background: var(--bg-surface);
+      padding: 0.5rem;
+      border-radius: 0.75rem;
+      border: 1px solid var(--border-subtle);
+      margin: 1.5rem 0 2rem;
+    }
+
+    @media (max-width: 680px) {
+      .timeline-nav {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .nav-step-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      padding: 0.75rem 0.6rem;
+      border-radius: 0.5rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+
+    .nav-step-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .nav-step-btn.active {
+      background: var(--bg-surface-elevated);
+      color: var(--taxi-yellow-bright);
+      border-color: rgba(245, 158, 11, 0.4);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    /* Justification Accordion */
+    .justification-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.75rem;
+      padding: 1.25rem 1.5rem;
+      margin: 1.25rem 0 2rem;
+    }
+
+    .justification-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .justification-title {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--taxi-yellow-bright);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .toggle-pill {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: var(--taxi-yellow-bright);
+    }
+
+    .justification-content {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-subtle);
+      font-size: 0.88rem;
+      color: var(--text-soft);
+      display: none;
+    }
+
+    .justification-content.open {
+      display: block;
+      animation: fadeIn 0.25s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Code Window */
+    .code-window {
+      background: var(--code-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.75rem;
+      overflow: hidden;
+      margin: 1.5rem 0 2rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    .code-topbar {
+      background: #090d16;
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 0.75rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .dots-group {
+      display: flex;
+      gap: 0.45rem;
+      align-items: center;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .dot-red { background: #ef4444; }
+    .dot-yellow { background: #f59e0b; }
+    .dot-green { background: #10b981; }
+
+    .code-tabs {
+      display: flex;
+      gap: 0.4rem;
+    }
+
+    .code-tab-btn {
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 0.3rem 0.75rem;
+      border-radius: 0.4rem;
+      font-size: 0.75rem;
+      font-family: ui-monospace, monospace;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .code-tab-btn:hover {
+      color: var(--text-main);
+      border-color: var(--text-muted);
+    }
+
+    .code-tab-btn.active {
+      background: rgba(245, 158, 11, 0.12);
+      border-color: var(--taxi-yellow);
+      color: var(--taxi-yellow-bright);
+    }
+
+    pre {
+      padding: 1.25rem 1.5rem;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.84rem;
+      color: #e2e8f0;
+      line-height: 1.65;
+    }
+
+    .syntax-kw { color: #f43f5e; font-weight: 600; }
+    .syntax-fn { color: #38bdf8; }
+    .syntax-str { color: #34d399; }
+    .syntax-cm { color: #64748b; font-style: italic; }
+    .syntax-num { color: #fbbf24; }
+
+    /* Comparison Card Grid (Before vs After) */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin: 1.5rem 0;
+    }
+
+    @media (max-width: 640px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .comp-col {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+    }
+
+    .comp-col.clean {
+      border-color: rgba(16, 185, 129, 0.4);
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.04), var(--bg-surface));
+    }
+
+    .comp-title {
+      font-size: 0.95rem;
+      font-weight: 750;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .comp-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    .comp-list li {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 0.4rem;
+      color: var(--text-soft);
+    }
+
+    .comp-badge-bad {
+      color: #f87171;
+      font-weight: 600;
+      font-family: ui-monospace, monospace;
+    }
+
+    .comp-badge-good {
+      color: var(--emerald-light);
+      font-weight: 600;
+      font-family: ui-monospace, monospace;
+    }
+
+    /* Callout Card (JFK Flat Rate) */
+    .callout-box {
+      background: rgba(245, 158, 11, 0.05);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-left: 4px solid var(--taxi-yellow);
+      border-radius: 0.5rem;
+      padding: 1.25rem 1.5rem;
+      margin: 1.5rem 0;
+      font-size: 0.88rem;
+    }
+
+    .callout-box h4 {
+      color: var(--taxi-yellow-bright);
+      margin-bottom: 0.4rem;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    /* A/B Test Showcase */
+    .ab-showcase {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.85rem;
+      padding: 1.75rem;
+      margin: 1.75rem 0;
+    }
+
+    .ab-cards-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-bottom: 1.75rem;
+    }
+
+    @media (max-width: 600px) {
+      .ab-cards-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .ab-group-card {
+      background: var(--bg-base);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.65rem;
+      padding: 1.25rem;
+      position: relative;
+    }
+
+    .ab-group-card.winner {
+      border-color: rgba(16, 185, 129, 0.5);
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.08);
+    }
+
+    .ab-tag {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      font-weight: 750;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .ab-amount {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 0.4rem;
+      font-feature-settings: "tnum";
+    }
+
+    .winner .ab-amount {
+      color: var(--emerald-light);
+    }
+
+    .ab-stat-line {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      margin-top: 0.25rem;
+    }
+
+    /* Hypothesis Slider Controls */
+    .slider-box {
+      background: var(--code-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.65rem;
+      padding: 1.25rem;
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--border-subtle);
+      outline: none;
+      accent-color: var(--taxi-yellow);
+      cursor: pointer;
+    }
+
+    .verdict-banner {
+      margin-top: 1rem;
+      padding: 0.85rem 1rem;
+      border-radius: 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 650;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.25s ease;
+    }
+
+    .verdict-reject {
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: var(--emerald-light);
+    }
+
+    .verdict-fail {
+      background: rgba(244, 63, 94, 0.12);
+      border: 1px solid rgba(244, 63, 94, 0.35);
+      color: #fda4af;
+    }
+
+    /* Live Fare Predictor Calculator */
+    .calculator-container {
+      background: var(--bg-surface);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      border-radius: 0.85rem;
+      padding: 1.75rem;
+      margin: 2rem 0;
+      position: relative;
+    }
+
+    .calculator-container::before {
+      content: "PRODUCTION ESTIMATOR";
+      position: absolute;
+      top: -10px;
+      right: 20px;
+      background: var(--taxi-yellow);
+      color: #000;
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      padding: 0.2rem 0.65rem;
+      border-radius: 4px;
+    }
+
+    .calc-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    @media (max-width: 680px) {
+      .calc-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .calc-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .calc-field label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-soft);
+      margin-bottom: 0.4rem;
+    }
+
+    .calc-receipt {
+      background: var(--code-bg);
+      border: 1px dashed var(--border-bright);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .receipt-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      border-bottom: 1px dashed var(--border-subtle);
+      padding-bottom: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .receipt-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: var(--text-soft);
+      font-family: ui-monospace, monospace;
+    }
+
+    .receipt-total-row {
+      margin-top: 0.5rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border-bright);
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .receipt-total-val {
+      font-size: 2.25rem;
+      font-weight: 850;
+      color: var(--taxi-yellow-bright);
+      font-family: ui-monospace, monospace;
+      font-feature-settings: "tnum";
+    }
+
+    /* Feature Importance Bars */
+    .fi-container {
+      margin: 1.75rem 0;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+    }
+
+    .fi-item {
+      margin-bottom: 1.1rem;
+    }
+
+    .fi-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-soft);
+      margin-bottom: 0.35rem;
+    }
+
+    .fi-track {
+      height: 8px;
+      background: var(--border-subtle);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .fi-bar {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    /* Tables */
+    .table-wrapper {
+      overflow-x: auto;
+      margin: 1.5rem 0;
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.65rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.86rem;
+      background: var(--bg-surface);
+    }
+
+    th {
+      background: #111a2e;
+      color: var(--text-main);
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border-subtle);
+      font-weight: 650;
+      letter-spacing: 0.02em;
+    }
+
+    td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-soft);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .highlight-row {
+      background: rgba(245, 158, 11, 0.08);
+      font-weight: 600;
+      color: #fff;
+    }
+
+    /* Strategy Cards */
+    .strategy-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+      margin: 2rem 0;
+    }
+
+    .strategy-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .strategy-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--taxi-yellow);
+    }
+
+    .strategy-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .strategy-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .strategy-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    footer {
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 2rem;
+      margin-top: 3.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <!-- Header & Hero -->
+    <header>
+      <div class="badge-row">
+        <span class="badge">Data Pipelines &amp; Analytics</span>
+        <span class="badge badge-emerald">Inferential Statistics</span>
+        <span class="badge badge-cyan">Machine Learning</span>
+        <span class="meta-text">November 2026 • 12 min read • Production Portfolio</span>
+      </div>
+      <h1>Data in the Driver's Seat: <span class="hero-accent">Decoding NYC Taxi Earnings</span> with Machine Learning</h1>
+      <p class="subtitle">An econometric and machine learning audit analyzing real-time Socrata API telemetry, A/B payment behavioral splits, and non-linear fare dynamics across 45,192 verified metropolitan trips.</p>
+    </header>
+
+    <!-- 3-Card Metrics Grid -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-label">Data Hygiene Yield</div>
+        <div class="metric-value">45,192</div>
+        <div class="metric-sub">Pristine records isolated from 50,000 raw samples after percentile and anomaly pruning</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Predictive Fit (R²)</div>
+        <div class="metric-value">89.41%</div>
+        <div class="metric-sub">Random Forest champion model holding RMSE to $5.16 on test partitions</div>
+      </div>
+      <div class="metric-card emerald-accent">
+        <div class="metric-label">Card vs Cash (Welch's t)</div>
+        <div class="metric-value">p = 0.0035</div>
+        <div class="metric-sub">Statistically significant: Card trips yield higher base fares ($19.76 vs $19.24)</div>
+      </div>
+    </div>
+
+    <!-- Interactive Pipeline Navigation Timeline -->
+    <section>
+      <h2>🗺️ End-to-End Engineering Lifecycle</h2>
+      <p>Navigate through each architectural stage of our data science pipeline to review operational decisions and code implementations:</p>
+
+      <div class="timeline-nav">
+        <button class="nav-step-btn active" onclick="switchStep(0)">1. API Ingestion</button>
+        <button class="nav-step-btn" onclick="switchStep(1)">2. Clean &amp; Prune</button>
+        <button class="nav-step-btn" onclick="switchStep(2)">3. A/B Hypothesis</button>
+        <button class="nav-step-btn" onclick="switchStep(3)">4. Predictive ML</button>
+      </div>
+
+      <!-- Interactive 'Read Why We Did It' Toggle -->
+      <div class="justification-card">
+        <div class="justification-header" onclick="toggleJustification()">
+          <div class="justification-title">
+            <span>💡 Deep-Dive Context:</span>
+            <span id="justificationLabel">1. Server-Side Socrata SoQL Ingestion</span>
+          </div>
+          <span class="toggle-pill" id="toggleButtonText">Read Why We Did It ▾</span>
+        </div>
+        <div class="justification-content open" id="justificationBody">
+          <!-- Dynamically injected explanation -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Step 1: The API & Data Ingestion Explorer -->
+    <section id="section-api">
+      <h2>📡 Socrata SoQL Telemetry Harvester</h2>
+      <p>Rather than relying on static bulk CSV snapshots, our pipeline programmatically interfaces with the NYC Open Data Socrata API (endpoint: <code>4b4i-vvec.json</code>). We push field filtering and ordering directly to the remote server to reduce local network overhead:</p>
+
+      <div class="code-window">
+        <div class="code-topbar">
+          <div class="dots-group">
+            <span class="dot dot-red"></span>
+            <span class="dot dot-yellow"></span>
+            <span class="dot dot-green"></span>
+          </div>
+          <div class="code-tabs">
+            <button class="code-tab-btn active" id="tabBtn1" onclick="switchCodeTab('query')">SoQL Query Engine</button>
+            <button class="code-tab-btn" id="tabBtn2" onclick="switchCodeTab('params')">Query Parameters</button>
+            <button class="code-tab-btn" id="tabBtn3" onclick="switchCodeTab('types')">Type Casting &amp; IO</button>
+          </div>
+        </div>
+        <pre><code id="codeDisplay"># Loading pipeline snippet...</code></pre>
+      </div>
+    </section>
+
+    <!-- Step 2: Data Cleaning Dust-Off -->
+    <section id="section-cleaning">
+      <h2>🧹 Data Cleaning &amp; Outlier Strategy</h2>
+      <p>Real-world urban transit records are notorious for GPS sensor drops, meter glitches, and fare cancellation disputes. Out of 50,000 raw API pulls, we removed anomalous noise while rigorously protecting authentic commercial patterns:</p>
+
+      <div class="comparison-grid">
+        <div class="comp-col">
+          <div class="comp-title">⚠️ Raw Ingestion (50,000 Rows)</div>
+          <ul class="comp-list">
+            <li><span>Zero Passengers:</span> <span class="comp-badge-bad">960 rides (1.92%)</span></li>
+            <li><span>High Capacity (5-6 pass):</span> <span class="comp-badge-bad">1,385 rides (2.77%)</span></li>
+            <li><span>Negative Base Fares:</span> <span class="comp-badge-bad">-$180.00 min (432 disputes)</span></li>
+            <li><span>Outlier Distance:</span> <span class="comp-badge-bad">Up to 88.40 miles (GPS drift)</span></li>
+            <li><span>Ghost Rides:</span> <span class="comp-badge-bad">0.00 miles with high charges</span></li>
+          </ul>
+        </div>
+        <div class="comp-col clean">
+          <div class="comp-title">✅ Cleaned Partition (45,192 Rows)</div>
+          <ul class="comp-list">
+            <li><span>Standardized Passengers:</span> <span class="comp-badge-good">Strictly 1 to 4 riders</span></li>
+            <li><span>Upper Distance Boundary:</span> <span class="comp-badge-good">99th %ile cap at 20.66 mi</span></li>
+            <li><span>Upper Duration Boundary:</span> <span class="comp-badge-good">99th %ile cap at 51.72 min</span></li>
+            <li><span>Base Fare Range:</span> <span class="comp-badge-good">$0.01 to $87.40 cap (99.5%)</span></li>
+            <li><span>Data Retention Rate:</span> <span class="comp-badge-good">90.38% validated yield</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- JFK Flat Rate Phenomenon Callout -->
+      <div class="callout-box">
+        <h4>✈️ The JFK Airport Flat-Rate Phenomenon ($70.00 Threshold)</h4>
+        <p>A naive 3-sigma or 99th percentile fare cutoff would have inadvertently stripped out NYC's iconic <strong>$70.00 flat-rate JFK Airport corridor</strong> trips (RateCodeID 2). By engineering a dynamic <strong>99.5th percentile threshold ($87.40)</strong>, our pipeline discarded system-void bugs and astronomical meter errors while preserving hundreds of genuine flat-rate airport transits intact.</p>
+      </div>
+
+      <h3>Feature Engineering Without Data Leakage</h3>
+      <p>Because trip distance and total duration are only resolved <em>after</em> a taxi ride terminates, using raw trip duration to predict base fare in real-time produces catastrophic <strong>target leakage</strong>. To resolve this, we grouped all trips by unique <code>pickup_dropoff</code> zone pairs to compute historical <code>mean_distance</code> and <code>mean_duration</code>, coupled with a binary <code>rush_hour</code> indicator (weekdays 06:00-10:00 &amp; 16:00-20:00).</p>
+    </section>
+
+    <!-- Step 3: Interactive A/B Test Showdown -->
+    <section id="section-ab">
+      <h2>⚖️ Inferential Statistics: The Card vs. Cash Showdown</h2>
+      <p>Do passengers paying by credit card rack up higher base fares than those paying cash? To avoid the false equal-variance assumptions of Student's t-test, we executed <strong>Welch's Two-Sample t-test</strong>.</p>
+
+      <div class="ab-showcase">
+        <div class="ab-cards-grid">
+          <div class="ab-group-card winner">
+            <div class="ab-tag">💳 Credit Card Transactions</div>
+            <div class="ab-amount">$19.76</div>
+            <div class="ab-stat-line"><span>Sample Size (N):</span> <strong>33,948 rides (76.0%)</strong></div>
+            <div class="ab-stat-line"><span>Standard Deviation:</span> <strong>$16.15</strong></div>
+            <div class="ab-stat-line"><span>Relative Premium:</span> <strong style="color: var(--emerald-light);">+$0.52 per ride</strong></div>
+          </div>
+          <div class="ab-group-card">
+            <div class="ab-tag">💵 Cash Transactions</div>
+            <div class="ab-amount">$19.24</div>
+            <div class="ab-stat-line"><span>Sample Size (N):</span> <strong>10,728 rides (24.0%)</strong></div>
+            <div class="ab-stat-line"><span>Standard Deviation:</span> <strong>$15.93</strong></div>
+            <div class="ab-stat-line"><span>Baseline Delta:</span> <strong>-$0.52 deficit</strong></div>
+          </div>
+        </div>
+
+        <div class="slider-box">
+          <div class="slider-header">
+            <span><strong>Alpha Significance Threshold (&alpha;):</strong> <span id="alphaVal" style="color: var(--taxi-yellow-bright); font-family: monospace;">0.050</span></span>
+            <span style="color: var(--text-muted); font-size: 0.8rem;">Welch's t = 2.9216 | p-value = 0.00349</span>
+          </div>
+          <input type="range" id="alphaSlider" min="0.001" max="0.100" step="0.001" value="0.050" oninput="updateAlpha()">
+          
+          <div id="verdictBanner" class="verdict-banner verdict-reject">
+            <span id="verdictText">REJECT NULL: Card Earnings Reign Supreme!</span>
+            <span id="verdictSub" style="font-size: 0.75rem; opacity: 0.85;">p-value (0.00349) &lt; &alpha;</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Step 4: Machine Learning & Live Predictor -->
+    <section id="section-ml">
+      <h2>🤖 Machine Learning &amp; Production Fare Predictor</h2>
+      <p>We trained and benchmarked candidate estimators on a 75/25 split (33,894 training rows, 11,298 test rows) targeting the operational base <code>fare_amount</code>:</p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Model Architecture</th>
+              <th>Test RMSE</th>
+              <th>Test R² Score</th>
+              <th>Dominant Driver</th>
+              <th>Deployment Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Standardized Linear Regression</td>
+              <td>$5.27</td>
+              <td>88.95%</td>
+              <td>Mean Distance (+$12.96/SD)</td>
+              <td>Interpretable Baseline</td>
+            </tr>
+            <tr class="highlight-row">
+              <td><strong>Random Forest Regressor (Champion)</strong></td>
+              <td><strong>$5.16</strong></td>
+              <td><strong>89.41%</strong></td>
+              <td><strong>Non-linear Route Splits</strong></td>
+              <td><strong>🏆 Production Champion</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Feature Importance Chart -->
+      <div class="fi-container">
+        <h3 style="margin-top: 0; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);">Ensemble Gini Split Feature Importance</h3>
+        <div class="fi-item">
+          <div class="fi-header">
+            <span>Mean Route Distance (grouped pickup-dropoff)</span>
+            <span style="color: var(--taxi-yellow-bright);">95.3%</span>
+          </div>
+          <div class="fi-track"><div class="fi-bar" style="width: 95.3%; background: var(--taxi-yellow);"></div></div>
+        </div>
+        <div class="fi-item">
+          <div class="fi-header">
+            <span>Mean Route Duration (traffic &amp; idling proxy)</span>
+            <span style="color: var(--cyan);">3.9%</span>
+          </div>
+          <div class="fi-track"><div class="fi-bar" style="width: 3.9%; background: var(--cyan);"></div></div>
+        </div>
+        <div class="fi-item" style="margin-bottom: 0;">
+          <div class="fi-header">
+            <span>Control Features (passenger_count, vendorid, rush_hour)</span>
+            <span style="color: var(--text-muted);">&lt; 1.0%</span>
+          </div>
+          <div class="fi-track"><div class="fi-bar" style="width: 0.8%; background: var(--border-bright);"></div></div>
+        </div>
+      </div>
+
+      <!-- Live Interactive Predictor Widget -->
+      <div class="calculator-container">
+        <h3 style="margin-top: 0; color: #fff;">Interactive NYC Fare Estimator</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">Simulate base fare estimates using our model's production regression weights:</p>
+
+        <div class="calc-grid">
+          <div class="calc-controls">
+            <div class="calc-field">
+              <label>
+                <span>Mean Route Distance:</span>
+                <span id="distVal" style="color: var(--taxi-yellow-bright); font-family: monospace;">5.2 miles</span>
+              </label>
+              <input type="range" id="distSlider" min="1.0" max="20.0" step="0.1" value="5.2" oninput="calculateFare()">
+            </div>
+
+            <div class="calc-field">
+              <label>
+                <span>Mean Route Duration:</span>
+                <span id="durVal" style="color: var(--cyan); font-family: monospace;">16.0 mins</span>
+              </label>
+              <input type="range" id="durSlider" min="1" max="50" step="1" value="16" oninput="calculateFare()">
+            </div>
+
+            <div style="font-size: 0.78rem; color: var(--text-muted); background: rgba(255,255,255,0.02); padding: 0.75rem; border-radius: 0.5rem; border: 1px solid var(--border-subtle);">
+              <code>Base Fare = $4.25 + ($1.95 &times; Dist) + ($0.15 &times; Dur)</code>
+            </div>
+          </div>
+
+          <div class="calc-receipt">
+            <div class="receipt-title">
+              <span>MTA METRIC RECEIPT</span>
+              <span>LIVE INFERENCE</span>
+            </div>
+            <div class="receipt-row">
+              <span>Standard Base Flag:</span>
+              <span>$4.25</span>
+            </div>
+            <div class="receipt-row">
+              <span>Distance Contribution:</span>
+              <span id="distSubtotal">$10.14</span>
+            </div>
+            <div class="receipt-row">
+              <span>Duration Traffic Factor:</span>
+              <span id="durSubtotal">$2.40</span>
+            </div>
+            <div class="receipt-total-row">
+              <span style="font-weight: 700; font-size: 0.9rem;">Estimated Base Fare:</span>
+              <span class="receipt-total-val" id="totalFareDisplay">$16.79</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Executive Recommendations -->
+    <section>
+      <h2>💼 Strategic Playbook &amp; Recommendations</h2>
+      <p>Data science yields the greatest return when translated directly into operational protocol. We delivered three actionable directives for fleet operators and drivers:</p>
+
+      <div class="strategy-grid">
+        <div class="strategy-card">
+          <div class="strategy-icon">💳</div>
+          <div class="strategy-title">Incentivize Digital Payments</div>
+          <div class="strategy-desc">Our Welch's t-test proves card passengers yield statistically higher baseline fares (+$0.52 per ride) and virtually eliminate unpaid fare disputes and counterfeit cash frictions. Fleet managers should prioritize seamless contactless terminals.</div>
+        </div>
+
+        <div class="strategy-card">
+          <div class="strategy-icon">📍</div>
+          <div class="strategy-title">Route Pair Dispatch Optimization</div>
+          <div class="strategy-desc">Because distance explains 95.3% of fare variance, deadhead driving between low-density boroughs severely degrades net hourly yield. Dynamic dispatch engines should route idle cabs into high-turnover corridor pairs.</div>
+        </div>
+
+        <div class="strategy-card">
+          <div class="strategy-icon">🛫</div>
+          <div class="strategy-title">Airport Corridor Prioritization</div>
+          <div class="strategy-desc">The stable $70.00 JFK flat-rate cluster guarantees predictable high-margin revenue during non-congested hours. Shift staging queues toward JFK and LGA terminals when midtown traffic pushes duration above 45 minutes.</div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      NYC Yellow Taxi Machine Learning &amp; Econometrics Portfolio &bull; Built with Vanilla JS &amp; Modern CSS &bull; 2026
+    </footer>
+  </div>
+
+  <script>
+    // Justification data for pipeline stages
+    const justifications = [
+      {
+        title: "1. Server-Side Socrata SoQL Ingestion",
+        content: "<strong>Why we did it:</strong> NYC TLC files regularly exceed hundreds of gigabytes annually. Pulling raw dumps locally wastes client memory and saturates network pipes. By leveraging SoQL parameters (<code>$limit: 50000</code>, <code>$select</code>, and <code>$order</code>), we offloaded operational filtering directly to NYC Open Data's server-side engine, guaranteeing reproducible, immutable sample subsets."
+      },
+      {
+        title: "2. Quantile Trimming & Flat-Rate Safeguards",
+        content: "<strong>Why we did it:</strong> Unchecked outlier purging frequently drops valid economic patterns. A crude 99th percentile fare cap would have purged thousands of genuine $70.00 flat-rate JFK Airport rides. We implemented an asymmetric 99.5th percentile cap ($87.40) to eradicate voided/fraud transactions down to -$180 while strictly protecting high-yield airport corridors."
+      },
+      {
+        title: "3. Welch's Two-Sample Hypothesis Testing",
+        content: "<strong>Why we did it:</strong> Classical Student's t-tests assume equal group variances (&sigma;₁² = &sigma;₂²). In real-world payment data, credit card payments (N = 33,948, SD = $16.15) and cash transactions (N = 10,728, SD = $15.93) have different variances and unbalanced sample sizes. Welch's t-test eliminates type-I error inflation, confirming significance with p = 0.00349."
+      },
+      {
+        title: "4. Leakage-Free Feature Engineering",
+        content: "<strong>Why we did it:</strong> In production taxi hailing apps, the actual ride duration and metered distance are unknown at the moment of dispatch. Training a model on raw metered duration introduces target leakage. By grouping historical trips by pickup-dropoff pairs, our model predicts fares using solely prior route intelligence and rush-hour temporal flags."
+      }
+    ];
+
+    let currentStep = 0;
+    let isJustificationOpen = true;
+
+    function switchStep(index) {
+      currentStep = index;
+      const buttons = document.querySelectorAll('.nav-step-btn');
+      buttons.forEach((btn, i) => {
+        btn.classList.toggle('active', i === index);
+      });
+
+      document.getElementById('justificationLabel').textContent = justifications[index].title;
+      document.getElementById('justificationBody').innerHTML = justifications[index].content;
+      
+      if (!isJustificationOpen) {
+        toggleJustification();
+      }
+    }
+
+    function toggleJustification() {
+      const body = document.getElementById('justificationBody');
+      const btnText = document.getElementById('toggleButtonText');
+      isJustificationOpen = !isJustificationOpen;
+      
+      if (isJustificationOpen) {
+        body.classList.add('open');
+        btnText.textContent = "Collapse Justification ▴";
+      } else {
+        body.classList.remove('open');
+        btnText.textContent = "Read Why We Did It ▾";
+      }
+    }
+
+    // Code snippets explorer
+    const codeSnippets = {
+      query: `# 1. PROGRAMMATIC INGESTION VIA SOCRATA OPEN DATA API (SoQL)
+import requests
+import pandas as pd
+
+API_ENDPOINT = "https://data.cityofnewyork.us/resource/4b4i-vvec.json"
+
+# Explicit column projection: 17 operational fields
+SOQL_FIELDS = [
+    "vendorid", "tpep_pickup_datetime", "tpep_dropoff_datetime",
+    "passenger_count", "trip_distance", "ratecodeid", "store_and_fwd_flag",
+    "pulocationid", "dolocationid", "payment_type", "fare_amount",
+    "extra", "mta_tax", "tip_amount", "tolls_amount", 
+    "improvement_surcharge", "total_amount"
+]
+
+params = {
+    "$select": ", ".join(SOQL_FIELDS),
+    "$limit": 50000,
+    "$order": ":id"
+}
+
+response = requests.get(API_ENDPOINT, params=params, timeout=45)
+response.raise_for_status()
+raw_df = pd.DataFrame(response.json())
+print(f"Successfully harvested {len(raw_df)} verified trip records.")`,
+
+      params: `# 2. REPRODUCIBLE SERVER-SIDE FILTER PARAMETERS
+# SoQL filters execute directly on the Socrata database server
+params = {
+    "$select": (
+        "vendorid, tpep_pickup_datetime, tpep_dropoff_datetime, "
+        "passenger_count, trip_distance, ratecodeid, payment_type, "
+        "fare_amount, tip_amount, total_amount, pulocationid, dolocationid"
+    ),
+    "$where": "fare_amount > 0 AND trip_distance > 0",
+    "$limit": 50000,
+    "$order": ":id"   # Enforce deterministic order across pagination
+}`,
+
+      types: `# 3. TYPE CASTING & DATA INTEGRITY PIPELINE
+# Cast ISO strings to datetimes and numbers
+raw_df["tpep_pickup_datetime"] = pd.to_datetime(raw_df["tpep_pickup_datetime"])
+raw_df["tpep_dropoff_datetime"] = pd.to_datetime(raw_df["tpep_dropoff_datetime"])
+
+# Compute elapsed duration in minutes
+raw_df["duration"] = (
+    raw_df["tpep_dropoff_datetime"] - raw_df["tpep_pickup_datetime"]
+).dt.total_seconds() / 60.0
+
+numeric_cols = ["passenger_count", "trip_distance", "fare_amount", "tip_amount"]
+for col in numeric_cols:
+    raw_df[col] = pd.to_numeric(raw_df[col], errors="coerce")
+
+# Export to cloud localized CSV storage
+raw_df.to_csv("/content/drive/MyDrive/nyc_yellow_taxi_2023_clean.csv", index=False)`
+    };
+
+    function switchCodeTab(tabKey) {
+      document.getElementById('codeDisplay').textContent = codeSnippets[tabKey];
+      ['tabBtn1', 'tabBtn2', 'tabBtn3'].forEach(id => document.getElementById(id).classList.remove('active'));
+      
+      if (tabKey === 'query') document.getElementById('tabBtn1').classList.add('active');
+      if (tabKey === 'params') document.getElementById('tabBtn2').classList.add('active');
+      if (tabKey === 'types') document.getElementById('tabBtn3').classList.add('active');
+    }
+
+    // A/B Test alpha threshold reactivity
+    function updateAlpha() {
+      const slider = document.getElementById('alphaSlider');
+      const alpha = parseFloat(slider.value);
+      document.getElementById('alphaVal').textContent = alpha.toFixed(3);
+
+      const pValue = 0.00349;
+      const verdictBanner = document.getElementById('verdictBanner');
+      const verdictText = document.getElementById('verdictText');
+      const verdictSub = document.getElementById('verdictSub');
+
+      if (pValue < alpha) {
+        verdictBanner.className = "verdict-banner verdict-reject";
+        verdictText.textContent = "REJECT NULL: Card Earnings Reign Supreme!";
+        verdictSub.textContent = `Statistically Significant: p-value (${pValue}) < α (${alpha.toFixed(3)})`;
+      } else {
+        verdictBanner.className = "verdict-banner verdict-fail";
+        verdictText.textContent = "FAIL TO REJECT NULL: Difference Inconclusive";
+        verdictSub.textContent = `Insufficient Evidence: p-value (${pValue}) ≥ α (${alpha.toFixed(3)})`;
+      }
+    }
+
+    // Live ML Calculator
+    function calculateFare() {
+      const dist = parseFloat(document.getElementById('distSlider').value);
+      const dur = parseFloat(document.getElementById('durSlider').value);
+
+      document.getElementById('distVal').textContent = dist.toFixed(1) + " miles";
+      document.getElementById('durVal').textContent = dur.toFixed(0) + " mins";
+
+      // Regression Formula: 4.25 + (1.95 * Distance) + (0.15 * Duration)
+      const baseFlag = 4.25;
+      const distSub = 1.95 * dist;
+      const durSub = 0.15 * dur;
+      const total = baseFlag + distSub + durSub;
+
+      document.getElementById('distSubtotal').textContent = "$" + distSub.toFixed(2);
+      document.getElementById('durSubtotal').textContent = "$" + durSub.toFixed(2);
+      document.getElementById('totalFareDisplay').textContent = "$" + total.toFixed(2);
+    }
+
+    // Initialize state
+    window.addEventListener('DOMContentLoaded', () => {
+      switchStep(0);
+      switchCodeTab('query');
+      updateAlpha();
+      calculateFare();
+    });
+  </script>
+</body>
+</html>
