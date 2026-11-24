@@ -136,7 +136,7 @@
       "issuer": "Coursera",
       "year": "2026",
       "description": "Statistical Hypothesis Testing, Predictive Modeling, Regression Diagnostics, Machine Learning Workflows, EDA, Feature Transformation",
-      "image": "./assets/images/UC-987c3cd4-eba8-48a0-922c-8d14a48a66ff.jpg",
+      "image": "./assets/images/google_advanced_data_analytics.jpg",
       "link": "https://coursera.org/share/137edc500d8208dd1e1fd2dd3a4aa70c"
     },
     {
@@ -144,7 +144,7 @@
       "issuer": "Coursera",
       "year": "2026",
       "description":"Foundation Model Evaluation & Benchmarking, Tool-Use Architectures, Retrieval Systems,Deployment, APIs, Vector Databases.",
-      "image": "./assets/images/UC-987c3cd4-eba8-48a0-922c-8d14a48a66ff.jpg",
+      "image": "./assets/images/building_llm_application.jpg",
       "link": "https://coursera.org/share/b102b3700ffa2163ec3529c82a5f8c91"
     },
     {
