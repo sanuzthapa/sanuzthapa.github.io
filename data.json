@@ -68,6 +68,11 @@
       }
     ],
     "skills": [
+      {
+        "name": "AI Engineering", 
+        "percentage": 80,
+        "subskills": [ "LangChain", "Pydantic", "Vector Databases (Qdrant)", "RAG Architectures", "API Latency & TokenProfiling", "Prompt Engineering", "Model Benchmarking", "FastAPI"]
+      },
       { 
         "name": "Data Science", 
         "percentage": 85,
