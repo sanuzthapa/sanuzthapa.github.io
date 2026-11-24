@@ -36,9 +36,9 @@
         "description": "Expertise in Pandas, NumPy and NLP pipelines to extract value from complex datasets." 
       },
       { 
-        "icon": "./assets/images/icon-dev.svg", 
-        "title": "Data Visualization", 
-        "description": "Advanced plotting with Matplotlib, Seaborn, and PowerBI." 
+        "icon": "./assets/images/artificial-intellegence.png", 
+        "title": "AI Engineering", 
+        "description": "Grounded RAG & RAGAS Pipeline: end-to-end RAG knowledge base featuring multi-source ingestion, semantic chunking, vector embedding retrieval, and automated RAGAS evaluation (faithfulness, context precision/recall) to deliver verifiable, hallucination-free LLM outputs in production. ." 
       },
       { 
         "icon": "./assets/images/icon-app.svg", 
